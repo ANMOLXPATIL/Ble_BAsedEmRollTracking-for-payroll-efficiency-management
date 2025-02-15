@@ -1,0 +1,129 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    user-select: none;
+    overflow-y: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: hsl(218deg, 50%, 91%);
+    height: 100vh;
+}
+
+.screen-1 {
+    background: hsl(213deg, 85%, 97%);
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em; /* Reduced gap between elements */
+    border-radius: 30px;
+    box-shadow: 0 0 2em hsl(231deg, 62%, 94%);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.logo-text {
+    font-family: 'Comic Sans MS', cursive, sans-serif; /* Changed font to Comic Sans MS */
+    font-size: 2.5em;
+    font-weight: bold;
+    color: hsl(233deg, 36%, 38%);
+    margin-bottom: 0.5em; /* Space below the logo text */
+}
+
+.email, .password {
+    background: hsl(0deg, 0%, 100%);
+    box-shadow: 0 0 2em hsl(231deg, 62%, 94%);
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    border-radius: 20px;
+    color: hsl(0deg, 0%, 30%);
+}
+
+.email input, .password input {
+    outline: none;
+    border: none;
+    font-size: 1em;
+    width: 100%;
+}
+
+.email input::placeholder, .password input::placeholder {
+    color: hsl(0deg, 0%, 0%);
+    font-size: 0.9em;
+}
+
+.sec-2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sec-2 ion-icon {
+    color: hsl(0deg, 0%, 30%);
+    font-size: 1.2em;
+}
+
+.show-hide {
+    margin-left: auto;
+    cursor: pointer; /* Make sure the eye icon is clickable */
+}
+
+.login {
+    padding: 1em;
+    background: hsl(233deg, 36%, 38%);
+    color: hsl(0, 0%, 100%);
+    border: none;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login:hover {
+    background: hsl(233deg, 36%, 30%);
+}
+
+.google-btn {
+    padding: 1em;
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #cccccc;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.google-btn:hover {
+    background: #f0f0f0;
+}
+
+.error {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 1em;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+    color: hsl(0deg, 0%, 37%);
+    margin-top: 1em;
+}
+
+.footer span {
+    cursor: pointer;
+}
+
+.footer span:hover {
+    color: hsl(233deg, 36%, 38%);
+}

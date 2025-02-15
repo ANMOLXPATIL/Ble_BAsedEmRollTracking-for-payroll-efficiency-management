@@ -1,0 +1,27 @@
+.navbar {
+    width: 15%;
+    background-color: #f4f4f9;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+}
+
+.nav-item {
+    padding: 10px 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+}
+
+.nav-item.active {
+    border-right: 2px solid green;
+}
+
+.logout {
+    margin-top: auto;
+    margin-bottom: 20px;
+}
