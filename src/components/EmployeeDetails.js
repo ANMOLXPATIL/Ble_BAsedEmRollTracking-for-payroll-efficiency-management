@@ -37,34 +37,27 @@ function EmployeeDetails() {
         const month = String(now.getMonth() + 1).padStart(2, "0");
         const today = `${year}-${month}-${String(now.getDate()).padStart(2, "0")}`;
         const firstDayOfMonth = `${year}-${month}-01`;
-
-        const attendanceRef = ref(database, `attendance`);
+        const attendanceRef = ref(database, "attendance");
         onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
-
             let totalActiveHoursToday = 0;
             let totalPresentDays = 0;
             let totalActiveHoursMonth = 0;
-
             for (const date in data) {
                 if (date >= firstDayOfMonth && date <= today && data[date][empID]) {
                     const dailyTotal = data[date][empID].total || 0;
-
                     if (dailyTotal > 0) totalPresentDays++;
                     totalActiveHoursMonth += dailyTotal;
-
                     if (date === today) {
                         totalActiveHoursToday = dailyTotal;
                     }
                 }
             }
-
             const avgActiveHours =
                 totalPresentDays > 0
                     ? (totalActiveHoursMonth / totalPresentDays / 3600).toFixed(2)
                     : 0;
-
             setDetails({
                 activeHoursToday: (totalActiveHoursToday / 3600).toFixed(2),
                 presentDays: totalPresentDays,
@@ -77,22 +70,20 @@ function EmployeeDetails() {
     useEffect(() => {
         if (!selectedDate) return;
 
-        const formattedDate = selectedDate.toISOString().split("T")[0];
+        // Ensure the date is formatted correctly without timezone shift
+        const formattedDate = selectedDate.toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
         const attendanceRef = ref(database, `attendance/${formattedDate}/${empID}`);
-
         onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) {
                 setDateDetails({ activeHours: 0, logs: [] });
                 return;
             }
-
             const logs = Object.values(data.logs || {}).map((log) => ({
                 ...log,
                 timestamp: formatTimestampTo12Hour(log.timestamp), // Convert to 12-hour format
             }));
             const activeHours = ((data.total || 0) / 3600).toFixed(2);
-
             setDateDetails({
                 activeHours: activeHours,
                 logs: logs,
@@ -106,37 +97,29 @@ function EmployeeDetails() {
             alert("Please select a month to export data.");
             return;
         }
-
         const year = selectedMonth.getFullYear();
         const month = String(selectedMonth.getMonth() + 1).padStart(2, "0");
         const firstDayOfMonth = `${year}-${month}-01`;
         const lastDayOfMonth = `${year}-${month}-${new Date(year, month, 0).getDate()}`;
-
-        const attendanceRef = ref(database, `attendance`);
-
+        const attendanceRef = ref(database, "attendance");
         onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) {
                 alert("No data available for the selected month.");
                 return;
             }
-
             const csvRows = ["Date,Active Hours (Hours),Entry/Exit Logs"]; // Header row
-
             for (const date in data) {
                 if (date >= firstDayOfMonth && date <= lastDayOfMonth && data[date][empID]) {
                     const dailyTotal = data[date][empID].total || 0;
                     const logs = Object.values(data[date][empID].logs || {});
-
                     const activeHours = (dailyTotal / 3600).toFixed(2);
                     const formattedLogs = logs
                         .map((log) => `${formatTimestampTo12Hour(log.timestamp)} - ${log.type}`)
                         .join("; ");
-
                     csvRows.push(`${date},${activeHours},"${formattedLogs}"`);
                 }
             }
-
             const csvContent = csvRows.join("\n");
             const blob = new Blob([csvContent], { type: "text/csv" });
             const url = URL.createObjectURL(blob);
@@ -154,26 +137,23 @@ function EmployeeDetails() {
             return;
         }
 
-        const formattedDate = selectedDate.toISOString().split("T")[0];
+        // Ensure the date is formatted correctly without timezone shift
+        const formattedDate = selectedDate.toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
         const attendanceRef = ref(database, `attendance/${formattedDate}/${empID}`);
-
         onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) {
                 alert("No data available for the selected date.");
                 return;
             }
-
             const logs = Object.values(data.logs || {});
             const activeHours = ((data.total || 0) / 3600).toFixed(2);
-
             const csvRows = [
                 "Date,Active Hours (Hours),Entry/Exit Logs", // Header row
                 `${formattedDate},${activeHours},"${logs
                     .map((log) => `${formatTimestampTo12Hour(log.timestamp)} - ${log.type}`)
                     .join("; ")}"`,
             ];
-
             const csvContent = csvRows.join("\n");
             const blob = new Blob([csvContent], { type: "text/csv" });
             const url = URL.createObjectURL(blob);
@@ -196,7 +176,6 @@ function EmployeeDetails() {
                     className="calendar-button"
                 />
             </div>
-
             {/* Monthly Details */}
             <div className="details">
                 <p>
@@ -212,11 +191,10 @@ function EmployeeDetails() {
                     {details.avgActiveHours || 0} hours/day
                 </p>
             </div>
-
             {/* Selected Date Details */}
             {selectedDate && (
                 <div className="selected-date-details">
-                    <h3>Details for {selectedDate.toISOString().split("T")[0]}</h3>
+                    <h3>Details for {selectedDate.toLocaleDateString("en-CA")}</h3>
                     <p>
                         <strong>Active Hours:</strong> {dateDetails.activeHours || 0} hours
                     </p>
@@ -230,7 +208,6 @@ function EmployeeDetails() {
                     </ul>
                 </div>
             )}
-
             <div style={{ marginTop: "20px" }}>
                 <DatePicker
                     selected={selectedMonth}

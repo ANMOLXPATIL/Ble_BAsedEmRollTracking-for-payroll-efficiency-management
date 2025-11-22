@@ -51,6 +51,7 @@ function Home() {
 
             {/* Main Content */}
             <div style={styles.content}>
+                <h1 style={styles.dashboardTitle}>Dashboard</h1>
                 {/* Statistics Cards */}
                 <div style={styles.statsContainer}>
                     <StatsCard title="Total Employees" value={activeEmployees.length + inactiveEmployees.length} color="#007bff" />
@@ -80,7 +81,7 @@ function Home() {
 
 // Stats Card Component
 const StatsCard = ({ title, value, color }) => (
-    <div style={{ ...styles.statsCard, borderLeft: `5px solid ${color}` }}>
+    <div style={{ ...styles.statsCard, borderLeft: `5px solid ${color}`, marginTop: "20px" }}>
         <h3 style={styles.cardTitle}>{title}</h3>
         <p style={{ ...styles.cardValue, color }}>{value}</p>
     </div>
@@ -105,9 +106,10 @@ const TabButton = ({ active, color, onClick, text }) => (
 // Styles
 const styles = {
     container: { display: "flex", height: "100vh", fontFamily: "Arial, sans-serif", margin: 0 },
-    navbar: { width: "75px", backgroundColor: "#f4f4f9", padding: "10px", display: "flex", flexDirection: "column", alignItems: "center", boxShadow: "2px 0 4px rgba(0, 0, 0, 0.1)", position: "fixed", top: 0, bottom: 0, left: 0, overflowY: "auto" },
-    content: { marginLeft: "100px", flex: 1, padding: "20px", overflowY: "auto", boxSizing: "border-box" },
-    statsContainer: { display: "flex", gap: "20px", marginBottom: "20px" },
+    navbar: { width: "70px", backgroundColor: "#f4f4f9", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", boxShadow: "2px 0 4px rgba(0, 0, 0, 0.1)", position: "fixed", top: 0, bottom: 0, left: 0, overflowY: "auto" },
+    content: { marginLeft: "50px", flex: 1, padding: "20px", overflowY: "auto", boxSizing: "border-box" },
+    dashboardTitle: { fontSize: "2rem", fontWeight: "bold", marginBottom: "20px", position: "absolute", top: "20px", left: "120px" },
+    statsContainer: { display: "flex", gap: "10px", marginBottom: "20px", marginTop: "50px" },
     statsCard: { backgroundColor: "#fff", padding: "20px", borderRadius: "8px", boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", width: "418px", textAlign: "center" },
     cardTitle: { color: "#000", fontSize: "1rem", fontWeight: "500" },
     cardValue: { fontSize: "2rem", fontWeight: "bold" },

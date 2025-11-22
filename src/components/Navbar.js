@@ -1,10 +1,11 @@
 import React from "react";
-import { RiDashboardLine } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
+import { RiDashboardLine, RiPlayListAddLine, RiLogoutCircleLine } from "react-icons/ri";
 import { FcTodoList } from "react-icons/fc";
-import { RiPlayListAddLine } from "react-icons/ri";
-import { RiLogoutCircleLine } from "react-icons/ri";
 
-function NavBar({ menu, setmenu, logOut }) {
+function NavBar({ logOut }) {
+    const navigate = useNavigate();
+
     const styling = {
         borderRight: "2px solid green",
         padding: "10px 0",
@@ -37,27 +38,18 @@ function NavBar({ menu, setmenu, logOut }) {
             }}
         >
             {/* Dashboard */}
-            <div
-                style={menu === "dashboard" ? styling : inactiveStyling}
-                onClick={() => setmenu("dashboard")}
-            >
-                <RiDashboardLine size={24} color={menu === "dashboard" ? "green" : "teal"} />
+            <div style={styling} onClick={() => navigate("/dashboard")}>
+                <RiDashboardLine size={24} color="green" />
             </div>
 
             {/* List All Employees */}
-            <div
-                style={menu === "listAll" ? styling : inactiveStyling}
-                onClick={() => setmenu("listAll")}
-            >
+            <div style={inactiveStyling} onClick={() => navigate("/listAll")}>
                 <FcTodoList size={24} />
             </div>
 
             {/* Create Employee */}
-            <div
-                style={menu === "createEmployee" ? styling : inactiveStyling}
-                onClick={() => setmenu("createEmployee")}
-            >
-                <RiPlayListAddLine size={24} color={menu === "createEmployee" ? "green" : "teal"} />
+            <div style={inactiveStyling} onClick={() => navigate("/createEmployee")}>
+                <RiPlayListAddLine size={24} color="teal" />
             </div>
 
             {/* Logout */}
