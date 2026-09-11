@@ -10,7 +10,8 @@ import {
     fetchAttendanceEvents, 
     fetchShifts, 
     DEFAULT_SHIFTS, 
-    calculateWorkforceVariance 
+    calculateWorkforceVariance,
+    getLocalDateString
 } from "../dbOperations";
 
 function EmployeeDetails() {
@@ -75,9 +76,9 @@ function EmployeeDetails() {
 
     useEffect(() => {
         const now = new Date();
+        const today = getLocalDateString(now);
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, "0");
-        const today = `${year}-${month}-${String(now.getDate()).padStart(2, "0")}`;
         const firstDayOfMonth = `${year}-${month}-01`;
         const attendanceRef = ref(database, "attendance");
 
@@ -119,7 +120,7 @@ function EmployeeDetails() {
 
     useEffect(() => {
         if (!selectedDate) return;
-        const formattedDate = selectedDate.toLocaleDateString("en-CA");
+        const formattedDate = getLocalDateString(selectedDate);
         const legacyKey = empID === "EMP001" ? "emp1" : empID === "EMP002" ? "emp2" : empID;
 
         const loadSessions = async () => {

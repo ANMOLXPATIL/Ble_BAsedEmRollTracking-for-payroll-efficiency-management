@@ -11,7 +11,8 @@ import {
     DEFAULT_SHIFTS,
     calculateWorkforceVariance,
     calculateOrgWorkforceMetrics,
-    processEventsToWorkSessions 
+    processEventsToWorkSessions,
+    getLocalDateString
 } from "../dbOperations";
 import { 
     RiAlertLine, 
@@ -29,23 +30,23 @@ function Home() {
     const [activeEmpIDs, setActiveEmpIDs] = useState([]);
     const [inactiveEmpIDs, setInactiveEmpIDs] = useState([]);
     const [todayTotals, setTodayTotals] = useState({});
+    const [livePresence, setLivePresence] = useState({});
+    const [todayDate, setTodayDate] = useState(() => getLocalDateString());
     const [activeTab, setActiveTab] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [shiftMode, setShiftMode] = useState("DAY"); // "DAY" or "NIGHT"
     const navigate = useNavigate();
 
-    // Compute effective operational date string based on shiftMode toggle
-    const getOperationalDateStr = () => {
-        const now = new Date();
-        // If night shift mode toggled, operational shift date is yesterday's date if before 06:00 AM
-        if (shiftMode === "NIGHT" && now.getHours() < 6) {
-            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-            return yesterday.toISOString().split("T")[0];
-        }
-        return now.toISOString().split("T")[0];
-    };
+    // The dashboard is intentionally scoped to the current local calendar day.
+    const targetDateStr = todayDate;
 
-    const targetDateStr = getOperationalDateStr();
+    useEffect(() => {
+        const dateTimer = window.setInterval(() => {
+            setTodayDate(getLocalDateString());
+        }, 60 * 1000);
+
+        return () => window.clearInterval(dateTimer);
+    }, []);
 
     useEffect(() => {
         const loadRegistry = async () => {
@@ -67,12 +68,18 @@ function Home() {
         });
 
         const attendanceRef = ref(database, `attendance/${targetDateStr}`);
+        const presenceRef = ref(database, "presence");
+
+        const unsubscribePresence = onValue(presenceRef, (snapshot) => {
+            setLivePresence(snapshot.val() || {});
+        });
 
         const unsubscribe = onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val() || {};
             const active = [];
             const inactive = [];
             const totals = {};
+            const nowUnix = Math.floor(Date.now() / 1000);
 
             // 1. Pre-fill all registered employees as inactive first
             if (employees && Object.keys(employees).length > 0) {
@@ -135,6 +142,27 @@ function Home() {
                 totals[resolvedEmpID] = processed.totalHours;
             }
 
+            // Live presence is independent of today's attendance totals. This
+            // keeps an employee present across midnight without importing old
+            // hours into today's metrics.
+            Object.keys(livePresence).forEach((key) => {
+                const presence = livePresence[key] || {};
+                const isFresh = Number(presence.unixTimestamp) > 0 &&
+                    nowUnix - Number(presence.unixTimestamp) <= 150;
+                if (presence.status === "online" && isFresh) {
+                    let resolvedEmpID = key;
+                    Object.keys(employees || {}).forEach((eId) => {
+                        const empObj = employees[eId];
+                        if (empObj && (empObj.beaconId === key || empObj.beaconName === key)) {
+                            resolvedEmpID = eId;
+                        }
+                    });
+                    if (!active.includes(resolvedEmpID)) active.push(resolvedEmpID);
+                    const idx = inactive.indexOf(resolvedEmpID);
+                    if (idx > -1) inactive.splice(idx, 1);
+                }
+            });
+
             setActiveEmpIDs(active);
             setInactiveEmpIDs(inactive);
             setTodayTotals(totals);
@@ -142,9 +170,10 @@ function Home() {
 
         return () => {
             unsubscribe();
+            unsubscribePresence();
             unsubGateways();
         };
-    }, [shiftMode, targetDateStr, employees]);
+    }, [shiftMode, targetDateStr, employees, livePresence]);
 
     // Filter out raw firebase push keys (keys starting with - or not matching known employee registry)
     const allEmpIDs = Array.from(new Set([...Object.keys(employees), ...activeEmpIDs, ...inactiveEmpIDs]))

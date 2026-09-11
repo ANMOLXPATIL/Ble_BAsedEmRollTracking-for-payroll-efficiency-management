@@ -1,6 +1,15 @@
 import { database } from "./firebase";
 import { ref, get, set, push, child } from "firebase/database";
 
+// Firebase attendance keys are written by the ESP32 using its configured
+// local timezone, so the web app must use local calendar dates as well.
+export const getLocalDateString = (date = new Date()) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
 // Default Shift Configurations
 export const DEFAULT_SHIFTS = {
     SHIFT_DAY: {
@@ -249,7 +258,7 @@ export const recordAttendanceEvent = async ({
     zoneId = "ZONE_ENTRANCE",
     rssi = -60
 }) => {
-    const today = dateStr || new Date().toISOString().split("T")[0];
+    const today = dateStr || getLocalDateString();
     const ts = unixTimestamp || Math.floor(Date.now() / 1000);
     const eventType = type.toUpperCase();
     const eventId = `${ts}_${eventType}`;
@@ -415,4 +424,3 @@ export const fetchBeacons = async () => {
     const snapshot = await get(child(dbRef, "beacons"));
     return snapshot.exists() ? snapshot.val() : {};
 };
-
