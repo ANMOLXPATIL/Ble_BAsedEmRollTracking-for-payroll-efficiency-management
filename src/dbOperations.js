@@ -79,6 +79,29 @@ export const DEFAULT_GATEWAYS = {
     }
 };
 
+export const DEFAULT_EMPLOYEES = {
+    EMP001: {
+        id: "EMP001",
+        name: "Anmol Patil",
+        department: "Engineering & IoT",
+        hourlyRate: 700,
+        beaconId: "beacon_001",
+        beaconName: "Emp1Anmol@comp&iot",
+        shiftId: "SHIFT_DAY",
+        status: "active"
+    },
+    EMP002: {
+        id: "EMP002",
+        name: "Manthan Patil",
+        department: "Operations",
+        hourlyRate: 650,
+        beaconId: "beacon_002",
+        beaconName: "Emp2Manthan@comp&iot",
+        shiftId: "SHIFT_DAY",
+        status: "active"
+    }
+};
+
 // Seed default employees, shifts, gateways, and beacons if they don't exist
 export const initializeRegistry = async () => {
     try {
@@ -96,29 +119,14 @@ export const initializeRegistry = async () => {
             await set(ref(database, "shifts"), DEFAULT_SHIFTS);
         }
 
-        // Seed employees with shifts
+        // Add prototype employees individually so unrelated registered records
+        // cannot prevent the fixed beacon mappings from being created.
         const empSnap = await get(child(dbRef, "employees"));
-        if (!empSnap.exists()) {
-            await set(ref(database, "employees"), {
-                EMP001: {
-                    id: "EMP001",
-                    name: "Anmol Patil",
-                    department: "Engineering & IoT",
-                    hourlyRate: 700,
-                    beaconId: "beacon_001",
-                    shiftId: "SHIFT_DAY",
-                    status: "active"
-                },
-                EMP002: {
-                    id: "EMP002",
-                    name: "Manthan Patil",
-                    department: "Operations",
-                    hourlyRate: 650,
-                    beaconId: "beacon_002",
-                    shiftId: "SHIFT_DAY",
-                    status: "active"
-                }
-            });
+        const existingEmployees = empSnap.val() || {};
+        for (const [employeeId, employee] of Object.entries(DEFAULT_EMPLOYEES)) {
+            if (!existingEmployees[employeeId]) {
+                await set(ref(database, `employees/${employeeId}`), employee);
+            }
         }
 
         // Seed beacons

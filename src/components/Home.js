@@ -8,6 +8,7 @@ import {
     fetchEmployees, 
     fetchBeacons, 
     fetchShifts, 
+    DEFAULT_EMPLOYEES,
     DEFAULT_SHIFTS,
     calculateWorkforceVariance,
     calculateOrgWorkforceMetrics,
@@ -50,7 +51,12 @@ function Home() {
             const emps = await fetchEmployees();
             const bcons = await fetchBeacons();
             const shfts = await fetchShifts();
-            setEmployees(emps);
+            const employeeRoster = Object.fromEntries(
+                Object.entries(emps).filter(([employeeId, employee]) =>
+                    employee && employee.id === employeeId
+                )
+            );
+            setEmployees({ ...DEFAULT_EMPLOYEES, ...employeeRoster });
             setBeacons(bcons);
             setShifts(shfts);
         };
