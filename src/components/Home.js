@@ -323,8 +323,8 @@ function Home() {
                     {/* 4. TIME VARIANCE: HOURS BELOW PLAN */}
                     <div style={styles.statCard}>
                         <div style={styles.statHeader}>HOURS BELOW PLAN</div>
-                        <div style={{ ...styles.statValue, color: "#6366F1" }}>{formattedHoursBelowPlan}</div>
-                        <div style={styles.statSubText}>
+                        <div style={{ ...styles.statValue, color: "#DC2626" }}>{formattedHoursBelowPlan}</div>
+                        <div style={{ ...styles.statSubText, color: "#DC2626" }}>
                             {orgMetrics.belowPlanPercentage.toFixed(1)}% below expected
                         </div>
                     </div>
