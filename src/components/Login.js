@@ -486,19 +486,23 @@ const styles = {
     },
     demoBtn: {
         width: "100%",
-        padding: "12px",
+        minHeight: "46px",
+        padding: "12px 16px",
+        marginTop: "18px",
         backgroundColor: "var(--bg-light-soft)",
         color: "var(--text-dark)",
         border: "1px solid var(--border-light)",
         borderRadius: "10px",
-        fontSize: "13px",
-        fontWeight: "700",
+        fontSize: "11px",
+        fontWeight: "800",
+        letterSpacing: "0.08em",
         cursor: "pointer",
+        boxSizing: "border-box",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: "10px",
-        transition: "background-color 0.2s ease"
+        transition: "all 0.2s ease",
+        outline: "none"
     },
     footerNote: {
         marginTop: "24px",
