@@ -33,7 +33,9 @@ const ProtectedRoute = ({ children }) => {
         );
     }
 
-    if (!user) {
+    const isDemoMode = sessionStorage.getItem("emptrack_demo_mode") === "true";
+
+    if (!user && !isDemoMode) {
         return <Navigate to="/login" replace />;
     }
 

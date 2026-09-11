@@ -15,6 +15,7 @@ function NavBar() {
 
     const handleSignOut = async () => {
         try {
+            sessionStorage.removeItem("emptrack_demo_mode");
             await signOut(auth);
             navigate("/login");
         } catch (error) {

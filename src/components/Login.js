@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { auth } from "../firebase";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { 
     RiCpuLine, 
@@ -8,7 +8,6 @@ import {
     RiLockPasswordLine, 
     RiEyeLine, 
     RiEyeOffLine, 
-    RiGoogleFill,
     RiBroadcastLine,
     RiCloudLine,
     RiBarChartGroupedLine
@@ -37,15 +36,10 @@ function Login() {
         }
     };
 
-    const handleGoogleSignIn = async () => {
+    const handleDemoSignIn = () => {
         setError("");
-        const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-            navigate("/home");
-        } catch (err) {
-            setError(err.message || "Failed to sign in with Google.");
-        }
+        sessionStorage.setItem("emptrack_demo_mode", "true");
+        navigate("/home");
     };
 
     return (
@@ -195,13 +189,13 @@ function Login() {
                             </button>
                         </form>
 
-                        <div style={styles.divider}>
-                            <span style={styles.dividerText}>or continue with</span>
-                        </div>
-
-                        {/* Google Auth */}
-                        <button type="button" onClick={handleGoogleSignIn} style={styles.googleBtn}>
-                            <RiGoogleFill size={18} color="#4285F4" /> Sign in with Google
+                        <button
+                            type="button"
+                            onClick={handleDemoSignIn}
+                            disabled={loading}
+                            style={styles.demoBtn}
+                        >
+                            {loading ? "OPENING DEMO..." : "OPEN DEMO ACCOUNT"}
                         </button>
 
                         <div style={styles.footerNote}>
@@ -490,7 +484,7 @@ const styles = {
         fontSize: "11px",
         color: "var(--text-muted-dark)"
     },
-    googleBtn: {
+    demoBtn: {
         width: "100%",
         padding: "12px",
         backgroundColor: "var(--bg-light-soft)",
