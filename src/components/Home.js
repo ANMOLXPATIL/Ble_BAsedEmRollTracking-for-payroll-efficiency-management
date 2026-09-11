@@ -34,8 +34,29 @@ function Home() {
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
 
-    // The dashboard is intentionally scoped to the current local calendar day.
-    const targetDateStr = todayDate;
+    const isNightShiftWindow = (() => {
+        const hour = new Date().getHours();
+        return hour >= 21 || hour < 6;
+    })();
+
+    // A night shift that continues after midnight belongs to the date on
+    // which it started. Day-shift views use the current local calendar day.
+    const targetDateStr = (() => {
+        if (isNightShiftWindow && new Date().getHours() < 6) {
+            const previousDate = new Date();
+            previousDate.setDate(previousDate.getDate() - 1);
+            return getLocalDateString(previousDate);
+        }
+        return todayDate;
+    })();
+
+    const visibleShiftId = isNightShiftWindow ? "SHIFT_NIGHT" : "SHIFT_DAY";
+    const visibleEmployeeIds = Object.keys(employees).filter((employeeId) =>
+        (employees[employeeId]?.shiftId || "SHIFT_DAY") === visibleShiftId
+    );
+    const visibleEmployees = Object.fromEntries(
+        visibleEmployeeIds.map((employeeId) => [employeeId, employees[employeeId]])
+    );
 
     useEffect(() => {
         const dateTimer = window.setInterval(() => {
@@ -77,8 +98,8 @@ function Home() {
             const totals = {};
 
             // 1. Pre-fill all registered employees as inactive first
-            if (employees && Object.keys(employees).length > 0) {
-                Object.keys(employees).forEach((empID) => {
+            if (visibleEmployeeIds.length > 0) {
+                visibleEmployeeIds.forEach((empID) => {
                     if (empID && !empID.startsWith("-") && empID !== "undefined") {
                         inactive.push(empID);
                     }
@@ -93,7 +114,7 @@ function Home() {
                 if (key.startsWith("-") || key === "undefined") continue;
 
                 const resolvedEmpID = resolveEmployeeId(key, employees, beacons);
-                if (!resolvedEmpID || !employees[resolvedEmpID]) continue;
+                if (!resolvedEmpID || !visibleEmployees[resolvedEmpID]) continue;
 
                 const logsObj = data[key].logs || {};
                 
@@ -134,15 +155,19 @@ function Home() {
             unsubscribe();
             unsubGateways();
         };
-    }, [targetDateStr, employees, beacons]);
+    }, [targetDateStr, employees, beacons, visibleShiftId, visibleEmployeeIds, visibleEmployees]);
 
     // Filter out raw firebase push keys (keys starting with - or not matching known employee registry)
     const allEmpIDs = Array.from(new Set([...Object.keys(employees), ...activeEmpIDs, ...inactiveEmpIDs]))
-        .filter((id) => employees[id])
+        .filter((id) => visibleEmployees[id])
         .filter((id) => id && !id.startsWith("-") && id !== "undefined");
 
     // Organization-level Planned vs Actual metrics from shared helper
-    const orgMetrics = calculateOrgWorkforceMetrics(employees, todayTotals, shifts, activeEmpIDs);
+    const visibleTotals = Object.fromEntries(
+        Object.entries(todayTotals).filter(([employeeId]) => visibleEmployees[employeeId])
+    );
+    const visibleActiveEmpIDs = activeEmpIDs.filter((employeeId) => visibleEmployees[employeeId]);
+    const orgMetrics = calculateOrgWorkforceMetrics(visibleEmployees, visibleTotals, shifts, visibleActiveEmpIDs);
 
     // Phase 10: Time-aware Anomaly & Exception Detection Engine
     const exceptions = [];
@@ -151,14 +176,16 @@ function Home() {
     // Rule 1: Worker worked significantly less than expected (> 1 hour deficit)
     // Shift/time-aware: Only trigger shift deficit alerts after end-of-day or shift completion window (e.g. after 17:00)
     allEmpIDs.forEach((empID) => {
-        const emp = employees[empID] || { name: empID };
+        const emp = visibleEmployees[empID] || { name: empID };
         const shift = shifts[emp.shiftId] || DEFAULT_SHIFTS.SHIFT_DAY;
         const expected = parseFloat(shift.expectedWorkHours || 8.0);
-        const actual = parseFloat(todayTotals[empID] || 0);
+        const actual = parseFloat(visibleTotals[empID] || 0);
         const diff = actual - expected;
 
         // Only generate deficit alert if current time is near/after shift end (e.g., after 17:00) or if worker left and is no longer active
-        const isShiftFinished = currentHour >= 17 || !activeEmpIDs.includes(empID);
+        const isShiftFinished = isNightShiftWindow
+            ? currentHour >= 6 && currentHour < 21
+            : currentHour >= 17 || !visibleActiveEmpIDs.includes(empID);
 
         if (isShiftFinished && diff <= -1.0) {
             exceptions.push({
@@ -208,8 +235,8 @@ function Home() {
         
         if (!matchesSearch) return false;
 
-        if (activeTab === "present") return activeEmpIDs.includes(empID);
-        if (activeTab === "absent") return !activeEmpIDs.includes(empID);
+        if (activeTab === "present") return visibleActiveEmpIDs.includes(empID);
+        if (activeTab === "absent") return !visibleActiveEmpIDs.includes(empID);
         return true;
     });
 
@@ -224,7 +251,7 @@ function Home() {
                 <div style={styles.header}>
                     <div>
                         <div style={styles.topBadge}>
-                            <span style={styles.liveDot}></span> BLE Gateway Active &bull; GATEWAY_01 Online ({targetDateStr})
+                            <span style={styles.liveDot}></span> BLE Gateway Active &bull; GATEWAY_01 Online &bull; {isNightShiftWindow ? "Night Shift" : "Day Shift"} ({targetDateStr})
                         </div>
                         <h1 style={styles.dashboardTitle}>Workforce Dashboard</h1>
                         <p style={styles.subtitle}>Owner & Manager Efficiency, Labor Cost, and Exception Monitor</p>
@@ -242,9 +269,9 @@ function Home() {
                     {/* 1. PEOPLE: PRESENT / TOTAL */}
                     <div style={styles.statCardDark}>
                         <div style={styles.statHeader}>PRESENT / TOTAL</div>
-                        <div style={styles.statValueDark}>{activeEmpIDs.length} <span style={{fontSize:"16px", color:"#94A3B8"}}>/ {orgMetrics.scheduledWorkerCount}</span></div>
+                        <div style={styles.statValueDark}>{visibleActiveEmpIDs.length} <span style={{fontSize:"16px", color:"#94A3B8"}}>/ {orgMetrics.scheduledWorkerCount}</span></div>
                         <div style={styles.statSubTextDark}>
-                            {orgMetrics.scheduledWorkerCount === 0 ? "No scheduled workers" : `${orgMetrics.scheduledWorkerCount - activeEmpIDs.length} Away`}
+                            {orgMetrics.scheduledWorkerCount === 0 ? "No scheduled workers" : `${orgMetrics.scheduledWorkerCount - visibleActiveEmpIDs.length} Away`}
                         </div>
                     </div>
 
@@ -327,13 +354,13 @@ function Home() {
                                 style={activeTab === "present" ? styles.tabActive : styles.tabInactive}
                                 onClick={() => setActiveTab("present")}
                             >
-                                Present ({activeEmpIDs.length})
+                                Present ({visibleActiveEmpIDs.length})
                             </button>
                             <button 
                                 style={activeTab === "absent" ? styles.tabActive : styles.tabInactive}
                                 onClick={() => setActiveTab("absent")}
                             >
-                                Away ({allEmpIDs.length - activeEmpIDs.length})
+                                Away ({allEmpIDs.length - visibleActiveEmpIDs.length})
                             </button>
                         </div>
 
@@ -370,8 +397,8 @@ function Home() {
 
                                         const empData = employees[empID] || { name: empID, department: "Factory Floor", hourlyRate: 0, shiftId: "SHIFT_DAY" };
                                         const shift = shifts[empData.shiftId] || DEFAULT_SHIFTS.SHIFT_DAY;
-                                        const isPresent = activeEmpIDs.includes(empID);
-                                        const trackedHrs = parseFloat(todayTotals[empID] || 0);
+                                        const isPresent = visibleActiveEmpIDs.includes(empID);
+                                        const trackedHrs = parseFloat(visibleTotals[empID] || 0);
                                         const expectedHrs = shift.expectedWorkHours || 8.0;
                                         const varMetrics = calculateWorkforceVariance(trackedHrs, expectedHrs);
                                         const estCost = trackedHrs * (empData.hourlyRate || 0);
