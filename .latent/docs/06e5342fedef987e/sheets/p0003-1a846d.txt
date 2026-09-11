@@ -1,0 +1,27 @@
+C.W.I.T, Pune-01 3 Dept of computer Engg & Iot
+TABLE OF CONTENTS
+Sr. No. Contents Page No.
+1 Introduction 5
+2 Acknowledgement 6
+3 Abstract 7
+4 Keywords 8
+4.1 Definitions, Acronyms, and Abbreviations 8
+5 Need of such System 9
+6 Detailed Problem Statement 10
+7 Software and Hardware Requirements 11
+7.1 Software Requirements 11
+7.2 Hardware Requirements 12
+8 Literature Survey 13
+9 Scope of the project 14
+10 System Design 15
+10.1 ER Diagram 15
+10.2 Use Case Diagram 16
+10.3 Class Diagram 17
+10.4 Data Flow Diagram 18
+11 Salient Features 19
+12 Code Implementation 21
+13 Hardware Preview 36
+14 Website Preview 37
+15 Future Prospect 41
+16 Conclusion 42
+17 References 43

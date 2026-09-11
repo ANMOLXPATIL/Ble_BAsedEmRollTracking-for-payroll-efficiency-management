@@ -1,0 +1,30 @@
+C.W.I.T, Pune-01 19 Dept of computer Engg & Iot
+11. SALIENT FEATURES
+The BLE-Based Employee Tracking System offers a range of intelligent features that
+make it efficient, user-friendly, and highly suitable for modern workforce environments. The
+system combines IoT technologies like BLE and ESP32 with cloud computing via Firebase,
+enabling seamless and automated employee tracking.
+1. Contactless Attendance Logging
+The system enables employees to be automatically logged in and out as they enter or exit the
+work premises. This reduces the need for physical attendance systems such as biometric
+scanners or manual registers.
+2. Real-Time Detection Using BLE Beacons
+Employees carry a BLE beacon that emits a unique signal. These beacons are detected in
+real-time by the ESP32 receiver placed at the site’s entry point, ensuring timely and accurate
+logging.
+3. ESP32 Receiver with Wi-Fi Support
+The ESP32 microcontroller, known for its low power consumption and dual connectivity
+(Wi-Fi and BLE), detects beacon signals and transmits the data to the cloud in real time.
+4. Firebase Cloud Integration
+All entry and exit logs are stored in Firebase, allowing for real-time updates, seamless
+synchronization, and secure data storage accessible from anywhere.
+5. Automatic Work Hour Calculation
+The system intelligently calculates the total active work duration per employee each day
+using the time difference between entry and exit timestamps.
+6. Web Dashboard for Monitoring
+A responsive and user-friendly web dashboard provides authorized personnel
+(admin/supervisors) access to attendance logs, active hours, and status of each employee.
+7. Passive Tracking
+Unlike RFID or biometric systems, employees don’t need to remember to scan a card or
+press a button. Their presence is passively detected when in range (up to ~30 meters),
+ensuring seamless operation.

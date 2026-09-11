@@ -1,67 +1,105 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { RiDashboardLine, RiPlayListAddLine, RiLogoutCircleLine } from "react-icons/ri";
-import { FcTodoList } from "react-icons/fc";
+import { useNavigate, useLocation } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import { 
+    RiDashboardLine, 
+    RiUserAddLine, 
+    RiLogoutCircleLine,
+    RiCpuLine
+} from "react-icons/ri";
 
-function NavBar({ logOut }) {
+function NavBar() {
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const styling = {
-        borderRight: "2px solid green",
-        padding: "10px 0",
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth);
+            navigate("/login");
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
+
+    const isActive = (path) => location.pathname === path;
+
+    const navItemStyle = (active) => ({
+        width: "48px",
+        height: "48px",
+        borderRadius: "12px",
         cursor: "pointer",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "50px",
-    };
-
-    const inactiveStyling = {
-        padding: "10px 0",
-        cursor: "pointer",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "50px",
-    };
+        transition: "all 0.2s ease",
+        backgroundColor: active ? "#0F172A" : "transparent",
+        color: active ? "#FFFFFF" : "#64748B",
+        marginBottom: "12px"
+    });
 
     return (
         <div
             style={{
-                width: "15%",
-                backgroundColor: "#f4f4f9",
-                height: "100vh",
+                width: "100%",
+                height: "100%",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                paddingTop: "20px",
+                paddingTop: "24px",
+                paddingBottom: "24px",
+                boxSizing: "border-box"
             }}
         >
-            {/* Dashboard */}
-            <div style={styling} onClick={() => navigate("/dashboard")}>
-                <RiDashboardLine size={24} color="green" />
+            {/* Brand Logo / Icon */}
+            <div 
+                style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "10px",
+                    backgroundColor: "#0F172A",
+                    color: "#FFFFFF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "800",
+                    fontSize: "18px",
+                    marginBottom: "32px",
+                    letterSpacing: "-0.05em"
+                }}
+                title="Workforce Intelligence System"
+            >
+                <RiCpuLine size={22} color="#10B981" />
             </div>
 
-            {/* List All Employees */}
-            <div style={inactiveStyling} onClick={() => navigate("/listAll")}>
-                <FcTodoList size={24} />
+            {/* Nav Items */}
+            <div 
+                style={navItemStyle(isActive("/home"))} 
+                title="Workforce Dashboard"
+                onClick={() => navigate("/home")}
+            >
+                <RiDashboardLine size={22} />
             </div>
 
-            {/* Create Employee */}
-            <div style={inactiveStyling} onClick={() => navigate("/createEmployee")}>
-                <RiPlayListAddLine size={24} color="teal" />
+            <div 
+                style={navItemStyle(isActive("/register"))} 
+                title="Register Worker"
+                onClick={() => navigate("/register")}
+            >
+                <RiUserAddLine size={22} />
             </div>
 
             {/* Logout */}
             <div
                 style={{
-                    ...inactiveStyling,
+                    ...navItemStyle(false),
                     marginTop: "auto",
-                    marginBottom: "20px",
+                    marginBottom: 0
                 }}
-                onClick={logOut}
+                title="Sign Out"
+                onClick={handleSignOut}
             >
-                <RiLogoutCircleLine size={24} color="red" />
+                <RiLogoutCircleLine size={22} color="#EF4444" />
             </div>
         </div>
     );

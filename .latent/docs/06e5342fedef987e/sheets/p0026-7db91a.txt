@@ -1,0 +1,57 @@
+C.W.I.T, Pune-01 26 Dept of computer Engg & Iot
+2)Dashboard Page
+import React, { useEffect, useState } from "react";
+import { database } from "../firebase";
+import { ref, onValue } from "firebase/database";
+import { Link, useNavigate } from "react-router-dom";
+import NavBar from "./Navbar"; // Import NavBar component
+function Home() {
+// State variables
+const [activeEmployees, setActiveEmployees] = useState([]);
+const [inactiveEmployees, setInactiveEmployees] = useState([]);
+const [menu, setMenu] = useState("home");
+const [activeTab, setActiveTab] = useState("present");
+const navigate = useNavigate();
+useEffect(() => {
+// Retrieve today's date using local time
+const today = (() => {
+const date = new Date();
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, '0');
+const day = String(date.getDate()).padStart(2, '0');
+return `${year}-${month}-${day}`;
+})();
+const attendanceRef = ref(database, `attendance/${today}`);
+// Listener for attendance data
+onValue(attendanceRef, (snapshot) => {
+const data = snapshot.val();
+if (!data) return;
+const active = [];
+const inactive = [];
+for (const empID in data) {
+const logs = data[empID].logs;
+const lastLog = Object.values(logs).pop();
+// Categorize employees as active or inactive
+lastLog.type === "entry" ? active.push(empID) : inactive.push(empID);
+}
+setActiveEmployees(active);
+setInactiveEmployees(inactive);
+});
+}, []);
+// Log out function
+const logOut = () => {
+console.log("Logged out");
+navigate("/login");
+};
+return (
+<div style={styles.container}>
+{/* Navbar */}
+<div style={styles.navbar}>
+<NavBar menu={menu} setmenu={setMenu} logOut={logOut} />
+</div>
+{/* Main Content */}
+<div style={styles.content}>
+<h1 style={styles.dashboardTitle}>Dashboard</h1>
+{/* Statistics Cards */}
+<div style={styles.statsContainer}>
+<StatsCard title="Total Employees" value={activeEmployees.length + inactiveEmployees.length} color="#007bff" />

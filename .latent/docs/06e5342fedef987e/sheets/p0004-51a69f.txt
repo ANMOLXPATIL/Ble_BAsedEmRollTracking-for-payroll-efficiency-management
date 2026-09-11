@@ -1,0 +1,13 @@
+C.W.I.T, Pune-01 4 Dept of computer Engg & Iot
+LIST OF FIGURES
+Figure No. Title Page No.
+10.1 ER Diagram 15
+10.2 Use Case Diagram 16
+10.3 Class Diagram 17
+10.4 Data Flow Diagram 18
+13.1 Hardware Preview 36
+13.2 Working of Hardware 36
+14.1 Login Page 37
+14.2 Dashboard - Overview 37
+14.3 Dashboard - Detailed View 38
+14.4 EmployeeDetails Page 40

@@ -1,0 +1,65 @@
+C.W.I.T, Pune-01 33 Dept of computer Engg & Iot
+{selectedDate && (
+<div className="tabContainer">
+<h3>Details for {selectedDate.toLocaleDateString("en-CA")}</h3>
+<p>
+<strong>Active Hours:</strong> {dateDetails.activeHours || 0} hours
+</p>
+<h4>Entry/Exit Logs:</h4>
+<div className="logsContainer">
+{dateDetails.logs.reduce((pairs, log, index) => {
+if (log.type === "entry") {
+const exitLog = dateDetails.logs[index + 1]?.type === "exit"
+? dateDetails.logs[index + 1]
+: null;
+pairs.push({ entry: log, exit: exitLog });
+}
+return pairs;
+}, []).map((pair, index) => (
+<div key={index} className="logCard">
+<div className="logCardHeader">
+<span className="sessionBadge">Session {index + 1}</span>
+<span className="durationBadge">
+{pair.exit ?
+calculateDuration(pair.entry.timestamp, pair.exit.timestamp) :
+'Ongoing'}
+</span>
+</div>
+<div className="logCardBody">
+<div className="logEntry">
+<span className="logType entry">Entry</span>
+<span className="logTime">{pair.entry.timestamp}</span>
+</div>
+{pair.exit && (
+<div className="logEntry">
+<span className="logType exit">Exit</span>
+<span className="logTime">{pair.exit.timestamp}</span>
+</div>
+)}
+</div>
+</div>
+))}
+</div>
+</div>
+)}
+<div className="exportSection">
+<button onClick={() => setShowMonthDropdown(!showMonthDropdown)}>
+Export Monthly Data
+</button>
+{showMonthDropdown && (
+<div className="exportControls">
+<select
+className="monthDropdown"
+value={selectedMonthForExport}
+onChange={(e) => setSelectedMonthForExport(e.target.value)}
+>
+<option value="">-- Select Month --</option>
+{generateMonths().map((month) => (
+<option key={month} value={month}>
+{month}
+</option>
+))}
+</select>
+<button onClick={handleExportMonthlyData}>Export</button>
+</div>
+)}

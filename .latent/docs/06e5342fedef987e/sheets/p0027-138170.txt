@@ -1,0 +1,53 @@
+C.W.I.T, Pune-01 27 Dept of computer Engg & Iot
+<StatsCard title="Present Employees" value={activeEmployees.length} color="#28a745" />
+<StatsCard title="Absent Employees" value={inactiveEmployees.length} color="#dc3545" />
+</div>
+{/* Tabs and Employee List */}
+<div style={styles.tabContainer}>
+{/* Tab Buttons */}
+<div style={styles.tabButtons}>
+<TabButton active={activeTab === "present"} color="#007bff" onClick={() => setActiveTab("present")}
+text="Present Employees" />
+<TabButton active={activeTab === "absent"} color="#dc3545" onClick={() => setActiveTab("absent")}
+text="Absent Employees" />
+</div>
+{/* Employee List */}
+<div style={styles.employeeList}>
+{(activeTab === "present" ? activeEmployees : inactiveEmployees).map((emp, index) => (
+<EmployeeCard key={index} empID={emp} />
+))}
+</div>
+</div>
+</div>
+</div>
+);
+}
+import { Link } from "react-router-dom";
+// Stats Card Component
+const StatsCard = ({ title, value, color }) => (
+<div style={{ ...styles.statsCard, borderLeft: `5px solid ${color}` }}>
+<h3 style={styles.cardTitle}>{title}</h3>
+<p style={{ ...styles.cardValue, color }}>{value}</p>
+</div>
+);
+// Employee Card Component
+const EmployeeCard = ({ empID }) => (
+<Link to={`/employee/${empID}`} style={styles.linkStyle}>
+<div style={styles.employeeCard}>
+<h3 style={styles.employeeName}>{empID}</h3>
+</div>
+</Link>
+);
+// Tab Button Component
+const TabButton = ({ active, color, onClick, text }) => (
+<button
+style={{
+...styles.tabButton,
+backgroundColor: active ? color : "#f4f4f9",
+color: active ? "#fff" : "#000"
+}}
+onClick={onClick}
+>
+{text}
+</button>
+);

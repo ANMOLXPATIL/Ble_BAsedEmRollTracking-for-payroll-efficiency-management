@@ -1,0 +1,16 @@
+C.W.I.T, Pune-01 12 Dept of computer Engg & Iot
+7.2 HARDWARE REQUIREMENTS
+1. ESP32 Development Board
+A powerful microcontroller with built-in Wi-Fi and Bluetooth Low Energy (BLE)
+capabilities. Acts as the BLE receiver at the workplace entrance.
+2. SparkFun NanoBeacon IN100
+Used as the BLE beacon that each employee will carry. Continuously emits a unique
+UUID to identify the employee.
+3. Coin Cell Batteries (e.g., CR2032)
+Powers the BLE beacons. Chosen for their compact size and long battery life.
+4. USB Cable and Power Adapter
+Required to power the ESP32 board.
+5. Wi-Fi Router / Access Point
+Provides internet connectivity to the ESP32 for transmitting data to Firebase.
+6. Computer or Laptop
+Used for development, programming, and deployment of the system.

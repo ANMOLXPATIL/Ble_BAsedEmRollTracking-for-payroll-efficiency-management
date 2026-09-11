@@ -1,0 +1,39 @@
+C.W.I.T, Pune-01 23 Dept of computer Engg & Iot
+void logFirebaseEvent(const char* empID, const char* type, time_t timestamp) {
+FirebaseJson json;
+json.add("type", type);
+json.add("timestamp", formatTimestamp(timestamp));
+String path = getFirebasePath(empID) + "/logs";
+Firebase.pushJSON(fbdo, path, json);
+}
+String getFirebasePath(const char* empID) {
+time_t now;
+time(&now);
+struct tm* timeinfo = localtime(&now);
+char dateStr[11];
+strftime(dateStr, 11, "%Y-%m-%d", timeinfo);
+return "/attendance/" + String(dateStr) + "/" + String(empID);
+}
+String formatTimestamp(time_t timestamp) {
+struct tm* timeinfo = localtime(&timestamp);
+char buffer[20];
+strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+return String(buffer);
+}
+void checkDailyReset() {
+time_t now;
+time(&now);
+struct tm* timeinfo = localtime(&now);
+if(timeinfo->tm_hour == 0 && timeinfo->tm_min == 0) {
+if(millis() - lastReset > 86400000) { // 24h cooldown
+lastReset = millis();
+resetDailyCounters();
+}
+}
+}
+void resetDailyCounters() {
+for(auto &emp : employees) {
+emp.dailyTotal = 0;
+Firebase.setDouble(fbdo, getFirebasePath(emp.empID) + "/total", 0);
+}
+}

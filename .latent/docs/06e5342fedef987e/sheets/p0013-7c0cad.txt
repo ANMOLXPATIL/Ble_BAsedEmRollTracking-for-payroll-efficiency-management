@@ -1,0 +1,32 @@
+C.W.I.T, Pune-01 13 Dept of computer Engg & Iot
+8.LITERATURE SURVEY
+To design an effective and practical BLE-based employee tracking system, it was important
+to understand existing technologies, systems, and research efforts in the field of attendance
+monitoring and workforce automation. The following sources and studies helped shape the
+approach and validated the need for such a solution:
+1. "Bluetooth Low Energy (BLE) for Industrial Applications" – IEEE Journals
+This study explored how BLE can be applied in real-time industrial tracking scenarios. It
+confirmed BLE’s low power consumption and reliable range (10–30 meters), making it
+suitable for employee detection at entry/exit points.
+2. "Time and Attendance Tracking with IoT Devices" – ResearchGate
+This paper discussed the inefficiencies of RFID and biometric systems. It proposed IoT-
+based models that automate attendance tracking and minimize human intervention, thereby
+enhancing data reliability and reducing fraud.
+3. "Firebase as a Scalable Backend for Real-Time Applications" – Firebase
+Documentation and Developer Blogs
+Firebase is widely used in IoT projects due to its real-time data synchronization, easy API
+access, and integration with web and mobile platforms. It provides robust support for live
+dashboards and cloud-hosted data.
+4. "ESP32 Technical Reference Manual" – Espressif Systems
+The ESP32 is a low-cost, feature-rich microcontroller with integrated BLE and Wi-Fi. Its
+technical documentation was crucial for designing the firmware logic, enabling it to detect
+beacon signals and connect to Firebase.
+5. "IoT-Based Smart Attendance System Using BLE Beacons" – International Journal
+of Advanced Research in Computer Engineering & Technology (IJARCET)
+This paper presented a system similar to our concept. It emphasized the advantages of using
+BLE beacons over RFID, including passive detection and higher automation. However, their
+design lacked real-time data sync and web dashboard integration, which our system includes.
+These references collectively justify the technical feasibility and growing relevance of BLE-
+based attendance systems. They reinforce the direction taken in this project, which combines
+BLE, ESP32, and Firebase to create a robust, scalable, and real-time employee tracking
+system.

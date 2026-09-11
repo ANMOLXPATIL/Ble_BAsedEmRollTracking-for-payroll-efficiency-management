@@ -1,0 +1,56 @@
+C.W.I.T, Pune-01 31 Dept of computer Engg & Iot
+let totalPresentDays = 0;
+let totalActiveHoursMonth = 0;
+for (const date in data) {
+if (date >= firstDayOfMonth && date <= today && data[date][empID]) {
+const dailyTotal = data[date][empID].total || 0;
+if (dailyTotal > 0) totalPresentDays++;
+totalActiveHoursMonth += dailyTotal;
+if (date === today) {
+totalActiveHoursToday = dailyTotal;
+}
+}
+}
+const avgActiveHours =
+totalPresentDays > 0
+? (totalActiveHoursMonth / totalPresentDays / 3600).toFixed(2)
+: 0;
+setDetails({
+activeHoursToday: (totalActiveHoursToday / 3600).toFixed(2),
+presentDays: totalPresentDays,
+avgActiveHours: avgActiveHours,
+});
+});
+}, [empID]);
+useEffect(() => {
+if (!selectedDate) return;
+const formattedDate = selectedDate.toLocaleDateString("en-CA");
+const attendanceRef = ref(database, `attendance/${formattedDate}/${empID}`);
+onValue(attendanceRef, (snapshot) => {
+const data = snapshot.val();
+if (!data) {
+setDateDetails({ activeHours: 0, logs: [] });
+return;
+}
+const logs = Object.values(data.logs || {}).map((log) => ({
+...log,
+timestamp: formatTimestampTo12Hour(log.timestamp),
+}));
+const activeHours = ((data.total || 0) / 3600).toFixed(2);
+setDateDetails({
+activeHours: activeHours,
+logs: logs,
+});
+});
+}, [selectedDate, empID]);
+const handleExportMonthlyData = () => {
+if (!selectedMonthForExport) {
+alert("Please select a valid month.");
+return;
+}
+const [year, month] = selectedMonthForExport.split("-");
+const firstDayOfMonth = `${year}-${month}-01`;
+const lastDayOfMonth = `${year}-${month}-${new Date(year, month, 0).getDate()}`;
+const attendanceRef = ref(database, "attendance");
+onValue(attendanceRef, (snapshot) => {
+const data = snapshot.val();

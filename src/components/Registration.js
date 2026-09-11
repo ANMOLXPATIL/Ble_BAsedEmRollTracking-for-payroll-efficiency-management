@@ -1,222 +1,132 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { addEmployee } from "../dbOperations";
+import NavBar from "./Navbar";
 
 function Registration() {
-    const [formFilled, setFormFilled] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const [successMsg, setSuccessMsg] = useState("");
+    const { register, handleSubmit, reset, formState: { errors } } = useForm();
+    const navigate = useNavigate();
 
-    const [imgSrc, setImgSrc] = useState(""); // Default image
-    const [otherImage, setOtherImage] = useState(false); // Tracks if a custom image is uploaded
-    const [error, setError] = useState(""); // Error message for invalid images
-    const [showError, setShowError] = useState(false); // Controls error visibility
-
-    const imageUploader = useRef(null); // Ref for file input
-    const uploadedImage = useRef(null); // Ref for displaying the uploaded image
-
-    const handleImageUpload = (e) => {
-        const [file] = e.target.files;
-        const selected = e.target.files[0];
-        const allowedTypes = ["image/png", "image/jpeg"];
-
-        if (selected && allowedTypes.includes(selected.type)) {
-            if (file.size <= 2000000) {
-                setOtherImage(true);
-                setImgSrc(file);
-                setShowError(false);
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    uploadedImage.current.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                setShowError(true);
-                setError("Image size should be less than 2MB");
-            }
-        } else {
-            setShowError(true);
-            setError("Please select an image file (png or jpg)");
+    const onSubmit = async (data) => {
+        setLoading(true);
+        setSuccessMsg("");
+        try {
+            await addEmployee(data);
+            setSuccessMsg(`Worker ${data.name} successfully registered in registry.`);
+            reset();
+            setTimeout(() => navigate("/home"), 1500);
+        } catch (err) {
+            console.error("Error registering worker:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const onSubmit = (data) => {
-        setLoading(true);
-
-        const getBase64Data = (file) => {
-            return new Promise((resolve, reject) => {
-                if (otherImage) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        data["dp"] = reader.result; // Add base64 image to form data
-                        resolve("data loaded");
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    data["dp"] = "default"; // Use default image
-                    resolve("default data");
-                }
-            });
-        };
-
-        getBase64Data(imgSrc).then(() => {
-            addEmployee(data)
-                .then(() => {
-                    setLoading(false);
-                    setFormFilled(true);
-                })
-                .catch((err) => {
-                    console.error("Error adding employee:", err);
-                    setLoading(false);
-                });
-        });
-    };
-
     return (
-        <div style={styles.container}>
-            {loading ? (
-                <div style={styles.loader}>Loading...</div>
-            ) : formFilled ? (
-                <div style={styles.successMessage}>Employee added successfully!</div>
-            ) : (
-                <form onSubmit={handleSubmit(onSubmit)} style={styles.form}>
-                    {/* Profile Picture */}
-                    <div style={styles.imageContainer}>
-                        <img
-                            ref={uploadedImage}
-                            src={typeof imgSrc === "string" ? imgSrc : URL.createObjectURL(imgSrc)}
-                            alt="Profile"
-                            style={styles.profileImage}
-                        />
-                        <input
-                            type="file"
-                            accept="image/png, image/jpeg"
-                            onChange={handleImageUpload}
-                            ref={imageUploader}
-                            style={styles.hiddenInput}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => imageUploader.current.click()}
-                            style={styles.uploadButton}
-                        >
-                            Upload Photo
-                        </button>
-                        {showError && <p style={styles.errorMessage}>{error}</p>}
-                    </div>
+        <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#F8FAFC", fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ width: "80px", position: "fixed", top: 0, bottom: 0, left: 0, backgroundColor: "#FFFFFF", borderRight: "1px solid #E2E8F0" }}>
+                <NavBar logOut={() => navigate("/login")} />
+            </div>
 
-                    {/* Name Field */}
-                    <div style={styles.inputGroup}>
-                        <label>Name</label>
-                        <input
-                            type="text"
-                            {...register("name", { required: "Name is required" })}
-                            style={styles.input}
-                        />
-                        {errors.name && <p style={styles.errorMessage}>{errors.name.message}</p>}
-                    </div>
-
-                    {/* Email Field */}
-                    <div style={styles.inputGroup}>
-                        <label>Email</label>
-                        <input
-                            type="email"
-                            {...register("email", { required: "Email is required" })}
-                            style={styles.input}
-                        />
-                        {errors.email && <p style={styles.errorMessage}>{errors.email.message}</p>}
-                    </div>
-
-                    {/* Department Field */}
-                    <div style={styles.inputGroup}>
-                        <label>Department</label>
-                        <select {...register("department")} style={styles.input}>
-                            <option value="Admin">Admin</option>
-                            <option value="Development">Development</option>
-                            <option value="Sales">Sales</option>
-                            <option value="Marketing">Marketing</option>
-                        </select>
-                    </div>
-
-                    {/* Submit Button */}
-                    <button type="submit" style={styles.submitButton}>
-                        Register Employee
+            <div style={{ marginLeft: "80px", flex: 1, padding: "40px", maxWidth: "800px" }}>
+                <div style={{ marginBottom: "24px" }}>
+                    <button onClick={() => navigate("/home")} style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid #E2E8F0", background: "#FFFFFF", color: "#475569", cursor: "pointer", fontWeight: "500", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        &larr; Back to Dashboard
                     </button>
-                </form>
-            )}
+                </div>
+
+                <div style={{ backgroundColor: "#FFFFFF", borderRadius: "16px", border: "1px solid #E2E8F0", padding: "36px", boxShadow: "0 4px 12px rgba(0,0,0,0.03)" }}>
+                    <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#0F172A", margin: "0 0 8px 0" }}>Register Factory Worker</h2>
+                    <p style={{ color: "#64748B", fontSize: "14px", margin: "0 0 28px 0" }}>Add worker details, hourly rate, and beacon mapping to the system.</p>
+
+                    {successMsg && (
+                        <div style={{ backgroundColor: "#ECFDF5", color: "#059669", padding: "14px", borderRadius: "10px", fontSize: "14px", fontWeight: "600", marginBottom: "24px", border: "1px solid #A7F3D0" }}>
+                            {successMsg}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                <label style={{ fontSize: "12px", fontWeight: "600", textTransform: "uppercase", color: "#475569", letterSpacing: "0.05em" }}>Worker ID</label>
+                                <input
+                                    type="text"
+                                    placeholder="EMP003"
+                                    {...register("id", { required: "Worker ID is required" })}
+                                    style={{ padding: "12px 14px", border: "1px solid #CBD5E1", borderRadius: "8px", fontSize: "14px", outline: "none", fontFamily: "inherit" }}
+                                />
+                                {errors.id && <span style={{ color: "#EF4444", fontSize: "12px" }}>{errors.id.message}</span>}
+                            </div>
+
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                <label style={{ fontSize: "12px", fontWeight: "600", textTransform: "uppercase", color: "#475569", letterSpacing: "0.05em" }}>Full Name</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ramesh Kumar"
+                                    {...register("name", { required: "Full Name is required" })}
+                                    style={{ padding: "12px 14px", border: "1px solid #CBD5E1", borderRadius: "8px", fontSize: "14px", outline: "none", fontFamily: "inherit" }}
+                                />
+                                {errors.name && <span style={{ color: "#EF4444", fontSize: "12px" }}>{errors.name.message}</span>}
+                            </div>
+                        </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                <label style={{ fontSize: "12px", fontWeight: "600", textTransform: "uppercase", color: "#475569", letterSpacing: "0.05em" }}>Department</label>
+                                <select {...register("department")} style={{ padding: "12px 14px", border: "1px solid #CBD5E1", borderRadius: "8px", fontSize: "14px", outline: "none", fontFamily: "inherit", backgroundColor: "#FFFFFF" }}>
+                                    <option value="Assembly Floor">Assembly Floor</option>
+                                    <option value="Packaging & Loading">Packaging & Loading</option>
+                                    <option value="Quality Control">Quality Control</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                    <option value="Engineering & IoT">Engineering & IoT</option>
+                                </select>
+                            </div>
+
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                <label style={{ fontSize: "12px", fontWeight: "600", textTransform: "uppercase", color: "#475569", letterSpacing: "0.05em" }}>Shift Schedule</label>
+                                <select {...register("shiftId")} style={{ padding: "12px 14px", border: "1px solid #CBD5E1", borderRadius: "8px", fontSize: "14px", outline: "none", fontFamily: "inherit", backgroundColor: "#FFFFFF" }}>
+                                    <option value="SHIFT_DAY">Standard Day Shift (09:00 - 18:00 | 8.0h)</option>
+                                    <option value="SHIFT_NIGHT">Night Production Shift (21:00 - 06:00 | 8.0h)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style={{ borderTop: "1px solid #E2E8F0", paddingTop: "20px", marginTop: "10px" }}>
+                            <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", fontWeight: "600", color: "#0F172A" }}>Physical BLE Beacon Association</h4>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                    <label style={{ fontSize: "12px", fontWeight: "600", textTransform: "uppercase", color: "#475569" }}>Beacon ID</label>
+                                    <input
+                                        type="text"
+                                        placeholder="beacon_003"
+                                        {...register("beaconId")}
+                                        style={{ padding: "12px 14px", border: "1px solid #CBD5E1", borderRadius: "8px", fontSize: "14px", outline: "none", fontFamily: "inherit" }}
+                                    />
+                                </div>
+
+                                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                    <label style={{ fontSize: "12px", fontWeight: "600", textTransform: "uppercase", color: "#475569" }}>Advertised Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Emp3Ramesh@comp&iot"
+                                        {...register("beaconName")}
+                                        style={{ padding: "12px 14px", border: "1px solid #CBD5E1", borderRadius: "8px", fontSize: "14px", outline: "none", fontFamily: "inherit" }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" disabled={loading} style={{ padding: "14px", backgroundColor: "#0F172A", color: "#FFFFFF", border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: "600", cursor: "pointer", marginTop: "12px" }}>
+                            {loading ? "Registering Worker..." : "Save Worker Record"}
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     );
 }
-
-const styles = {
-    container: {
-        fontFamily: "Arial, sans-serif",
-        padding: "20px",
-        maxWidth: "500px",
-        margin: "0 auto",
-    },
-    loader: {
-        textAlign: "center",
-        fontSize: "1.5rem",
-        marginTop: "50px",
-    },
-    successMessage: {
-        textAlign: "center",
-        fontSize: "1.5rem",
-        color: "green",
-        marginTop: "50px",
-    },
-    form: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "15px",
-    },
-    imageContainer: {
-        textAlign: "center",
-        marginBottom: "20px",
-    },
-    profileImage: {
-        width: "150px",
-        height: "150px",
-        borderRadius: "50%",
-        objectFit: "cover",
-        margin: "0 auto",
-    },
-    hiddenInput: {
-        display: "none",
-    },
-    uploadButton: {
-        marginTop: "10px",
-        padding: "10px",
-        backgroundColor: "#007bff",
-        color: "white",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-    },
-    inputGroup: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "5px",
-    },
-    input: {
-        padding: "10px",
-        border: "1px solid #ccc",
-        borderRadius: "5px",
-    },
-    errorMessage: {
-        color: "red",
-        fontSize: "0.9rem",
-    },
-    submitButton: {
-        padding: "10px",
-        backgroundColor: "#28a745",
-        color: "white",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-    },
-};
 
 export default Registration;

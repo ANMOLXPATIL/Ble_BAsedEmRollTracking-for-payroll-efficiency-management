@@ -1,0 +1,13 @@
+C.W.I.T, Pune-01 34 Dept of computer Engg & Iot
+</div>
+</div>
+</div>
+);
+}
+const StatsCard = ({ title, value }) => (
+<div className="statsCard">
+<h3 className="cardTitle">{title}</h3>
+<p className="cardValue">{value}</p>
+</div>
+);
+export default EmployeeDetails;

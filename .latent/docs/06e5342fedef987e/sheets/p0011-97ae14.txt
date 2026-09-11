@@ -1,0 +1,24 @@
+C.W.I.T, Pune-01 11 Dept of computer Engg & Iot
+7. SOFTWARE AND HARDWARE REQUIREMENTS
+To implement the BLE-Based Employee Tracking System, both hardware and software
+components are required. These components collectively enable real-time data transmission,
+processing, and visualization.
+7.1 SOFTWARE REQUIREMENTS
+1. Arduino IDE
+Used for programming the ESP32 microcontroller with the necessary firmware to
+detect BLE signals and handle Wi-Fi communication.
+2. Firebase (Google Backend-as-a-Service)
+Cloud database to store employee entry and exit timestamps. Offers real-time data
+synchronization and scalability.
+3. HTML, CSS, JavaScript (React/Java)
+Used to develop the web dashboard interface to view attendance logs, calculate work
+hours, and manage employee data.
+4. Firebase Admin SDK / REST APIs
+Enables secure interaction between the web interface and the Firebase backend for
+reading and writing data.
+5. Google Chrome / Any Modern Web Browser
+Required for accessing the web dashboard.
+6. Operating System
+o For development: Windows 10 or higher / Linux (Ubuntu)
+o For deployment: Can be hosted on Firebase Hosting or any compatible cloud
+server.

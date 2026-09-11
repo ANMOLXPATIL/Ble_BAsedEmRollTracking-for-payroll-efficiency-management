@@ -1,0 +1,40 @@
+C.W.I.T, Pune-01 25 Dept of computer Engg & Iot
+{/* Password Input */}
+<div className="password">
+<label htmlFor="password">Password</label>
+<div className="sec-2">
+<IonIcon icon={lockClosedOutline} />
+<input
+type={showPassword ? "text" : "password"} // Toggle between text and password
+name="password"
+placeholder="············"
+value={password}
+onChange={(e) => setPassword(e.target.value)}
+required
+/>
+<IonIcon
+icon={showPassword ? eyeOffOutline : eyeOutline} // Change icon based on visibility
+className="show-hide"
+onClick={togglePasswordVisibility} // Toggle password visibility
+/>
+</div>
+</div>
+{/* Login Button */}
+<button className="login" onClick={handleLogin}>
+Login
+</button>
+{/* Google Sign-In Button */}
+<button className="google-btn" onClick={handleGoogleSignIn}>
+Sign in with Google
+</button>
+{/* Error Message */}
+{error && <p className="error">{error}</p>}
+{/* Footer Links */}
+<div className="footer">
+<span>Sign up</span>
+<span>Forgot Password?</span>
+</div>
+</div>
+);
+}
+export default Login;

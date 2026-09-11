@@ -1,0 +1,66 @@
+C.W.I.T, Pune-01 28 Dept of computer Engg & Iot
+// Styles
+const styles = {
+container: {
+display: "flex",
+height: "100vh",
+fontFamily: "Arial, sans-serif",
+margin: 0
+},
+navbar: {
+width: "70px",
+backgroundColor: "#f4f4f9",
+padding: "20px",
+display: "flex",
+flexDirection: "column",
+alignItems: "center",
+boxShadow: "2px 0 4px rgba(0, 0, 0, 0.1)",
+position: "fixed",
+top: 0,
+bottom: 0,
+left: 0,
+overflowY: "auto"
+},
+content: {
+marginLeft: "90px",
+flex: 1,
+padding: "20px",
+overflowY: "auto",
+boxSizing: "border-box"
+},
+dashboardTitle: {
+fontSize: "2rem",
+fontWeight: "bold",
+marginBottom: "20px",
+position: "absolute",
+top: "20px",
+left: "120px"
+},
+statsContainer: {
+display: "flex",
+gap: "10px",
+marginBottom: "20px",
+marginTop: "50px"
+},
+statsCard: {
+backgroundColor: "#fff",
+padding: "20px",
+borderRadius: "8px",
+boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+width: "418px",
+textAlign: "center"
+},
+cardTitle: {
+color: "#000",
+fontSize: "1rem",
+fontWeight: "500"
+},
+cardValue: {
+fontSize: "2rem",
+fontWeight: "bold"
+},
+tabContainer: {
+backgroundColor: "#fff",
+padding: "20px",
+borderRadius: "20px",
+boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"

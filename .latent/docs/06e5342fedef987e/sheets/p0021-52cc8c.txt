@@ -1,0 +1,50 @@
+C.W.I.T, Pune-01 21 Dept of computer Engg & Iot
+12. CODE IMPLEMENTATION
+1) ESP32 CODE :-
+#include <WiFi.h>
+#include <FirebaseESP32.h>
+#include <BLEDevice.h>
+#include <BLEScan.h>
+#include <time.h>
+// ࡣŠFirebase Configuration
+#define FIREBASE_HOST "emprolltracking-default-rtdb.firebaseio.com"
+#define FIREBASE_SECRET "tEsqKC0bUzeeyBQ2HCfxFZeynQoUyhX6eEXVu3gT"
+֠ // ࡠWiFi Credentials
+#define WIFI_SSID "BLEPROJECT"
+#define WIFI_PASSWORD "Anmol@<>"
+// ࡵȠBLE Configuration
+#define SCAN_TIME 3 // Seconds per scan
+#define EXIT_TIMEOUT 30 // 30 seconds without signal = exit
+#define DEBOUNCE_TIME 10 // 10 seconds debounce to avoid multiple logs
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig config;
+struct Employee {
+const char* beaconName;
+const char* empID;
+bool isActive;
+unsigned long lastSeen;
+unsigned long entryTime;
+unsigned long dailyTotal;
+};
+Employee employees[] = {
+{"Emp1Anmol@comp&iot", "emp1", false, 0, 0, 0},
+{"Emp2Manthan@comp&iot", "emp2", false, 0, 0, 0}
+};
+BLEScan* pBLEScan;
+unsigned long lastReset = 0;
+void setup() {
+Serial.begin(115200);
+// Initialize WiFi
+WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+Serial.print("Connecting to WiFi");
+while (WiFi.status() != WL_CONNECTED) {
+Serial.print(".");
+delay(500);
+}
+Serial.println("\nConnected: " + WiFi.localIP().toString());
+// Initialize Firebase
+config.host = FIREBASE_HOST;
+config.signer.tokens.legacy_token = FIREBASE_SECRET;
+Firebase.begin(&config, &auth);
+Firebase.reconnectWiFi(true);

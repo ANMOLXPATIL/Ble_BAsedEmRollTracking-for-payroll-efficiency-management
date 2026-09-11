@@ -1,29 +1,45 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
 import Login from "./components/Login";
 import Home from "./components/Home";
 import EmployeeDetails from "./components/EmployeeDetails";
-import NavBar from "./components/Navbar"; // Import NavBar
+import Registration from "./components/Registration";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/home" element={<HomeWithNav />} />
-                <Route path="/employee/:id" element={<EmployeeDetails />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route 
+                    path="/home" 
+                    element={
+                        <ProtectedRoute>
+                            <Home />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/employee/:id" 
+                    element={
+                        <ProtectedRoute>
+                            <EmployeeDetails />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/register" 
+                    element={
+                        <ProtectedRoute>
+                            <Registration />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Router>
-    );
-}
-
-// Wrapper to include NavBar in Home
-function HomeWithNav() {
-    return (
-        <div style={{ display: "flex" }}>
-            <NavBar />
-            <Home />
-        </div>
     );
 }
 

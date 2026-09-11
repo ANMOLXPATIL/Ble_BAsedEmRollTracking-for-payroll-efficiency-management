@@ -1,0 +1,58 @@
+C.W.I.T, Pune-01 30 Dept of computer Engg & Iot
+3)EmployeeDetails Page:
+import React, { useEffect, useState } from "react";
+import { database } from "../firebase";
+import { ref, onValue } from "firebase/database";
+import { useParams } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "./EmployeeDetails.css";
+function EmployeeDetails() {
+const { id: empID } = useParams();
+const [details, setDetails] = useState({
+activeHoursToday: 0,
+presentDays: 0,
+avgActiveHours: 0,
+});
+const [selectedDate, setSelectedDate] = useState(null);
+const [dateDetails, setDateDetails] = useState({
+activeHours: 0,
+logs: [],
+});
+const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+const [selectedMonthForExport, setSelectedMonthForExport] = useState("");
+const formatTimestampTo12Hour = (timestamp) => {
+const date = new Date(timestamp);
+let hours = date.getHours();
+const minutes = date.getMinutes();
+const ampm = hours >= 12 ? "PM" : "AM";
+hours = hours % 12 || 12;
+const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+return `${hours}:${formattedMinutes} ${ampm}`;
+};
+const calculateDuration = (entryTime, exitTime) => {
+const parseTime = (timeStr) => {
+const [time, period] = timeStr.split('');
+let [hours, minutes] = time.split(':').map(Number);
+if (period === 'PM' && hours !== 12) hours += 12;
+if (period === 'AM' && hours === 12) hours = 0;
+return hours * 60 + minutes;
+};
+const entryMinutes = parseTime(entryTime);
+const exitMinutes = parseTime(exitTime);
+const totalMinutes = exitMinutes - entryMinutes;
+const hours = Math.floor(totalMinutes / 60);
+const minutes = totalMinutes % 60;
+return `${hours}h ${minutes}m`;
+};
+useEffect(() => {
+const now = new Date();
+const year = now.getFullYear();
+const month = String(now.getMonth() + 1).padStart(2, "0");
+const today = `${year}-${month}-${String(now.getDate()).padStart(2, "0")}`;
+const firstDayOfMonth = `${year}-${month}-01`;
+const attendanceRef = ref(database, "attendance");
+onValue(attendanceRef, (snapshot) => {
+const data = snapshot.val();
+if (!data) return;
+let totalActiveHoursToday = 0;
