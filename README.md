@@ -198,4 +198,4 @@ The dashboard intentionally reads the selected local day and ignores legacy raw 
 
 ## Scope
 
-This is an attendance and workforce-insight prototype. It estimates tracked labor cost from configured hourly rates. It does not implement payroll processing, taxes, PF, ESI, statutory compliance, or productivity measurement.
+This is an attendance and workforce-insight prototype. It estimates tracked labor cost from configured hourly rates. 
