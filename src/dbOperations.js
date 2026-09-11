@@ -259,6 +259,10 @@ export const calculateOrgWorkforceMetrics = (employeeDataMap = {}, todayTotalsMa
         : "0.0";
 
     const costVariance = totalEstimatedLaborCost - totalExpectedLaborCost;
+    const hoursBelowPlanDecimal = Math.max(0, totalExpectedHours - totalActualHours);
+    const belowPlanPercentage = totalExpectedHours > 0
+        ? (hoursBelowPlanDecimal / totalExpectedHours) * 100
+        : 0;
 
     return {
         scheduledWorkerCount,
@@ -272,7 +276,9 @@ export const calculateOrgWorkforceMetrics = (employeeDataMap = {}, todayTotalsMa
         workforceUtilization: parseFloat(workforceUtilization),
         totalExpectedLaborCost,
         totalEstimatedLaborCost,
-        costVariance
+        costVariance,
+        hoursBelowPlanDecimal: parseFloat(hoursBelowPlanDecimal.toFixed(2)),
+        belowPlanPercentage: parseFloat(belowPlanPercentage.toFixed(1))
     };
 };
 

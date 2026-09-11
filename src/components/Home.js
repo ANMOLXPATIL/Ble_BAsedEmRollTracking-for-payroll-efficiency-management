@@ -166,6 +166,13 @@ function Home() {
     );
     const visibleActiveEmpIDs = activeEmpIDs.filter((employeeId) => visibleEmployees[employeeId]);
     const orgMetrics = calculateOrgWorkforceMetrics(visibleEmployees, visibleTotals, shifts, visibleActiveEmpIDs);
+    const hoursBelowPlanHours = Math.floor(orgMetrics.hoursBelowPlanDecimal);
+    const hoursBelowPlanMinutes = Math.round(
+        (orgMetrics.hoursBelowPlanDecimal - hoursBelowPlanHours) * 60
+    );
+    const formattedHoursBelowPlan = hoursBelowPlanMinutes === 60
+        ? `${hoursBelowPlanHours + 1}h`
+        : `${hoursBelowPlanHours}h${hoursBelowPlanMinutes > 0 ? ` ${hoursBelowPlanMinutes}m` : ""}`;
 
     // Phase 10: Time-aware Anomaly & Exception Detection Engine
     const exceptions = [];
@@ -313,12 +320,12 @@ function Home() {
                         </div>
                     </div>
 
-                    {/* 4. MONEY: ESTIMATED LABOR COST */}
+                    {/* 4. TIME VARIANCE: HOURS BELOW PLAN */}
                     <div style={styles.statCard}>
-                        <div style={styles.statHeader}>EST. LABOR COST TODAY</div>
-                        <div style={{ ...styles.statValue, color: "#6366F1" }}>₹{orgMetrics.totalEstimatedLaborCost.toLocaleString("en-IN")}</div>
+                        <div style={styles.statHeader}>HOURS BELOW PLAN</div>
+                        <div style={{ ...styles.statValue, color: "#6366F1" }}>{formattedHoursBelowPlan}</div>
                         <div style={styles.statSubText}>
-                            ₹{orgMetrics.totalExpectedLaborCost.toLocaleString("en-IN")} planned ({orgMetrics.costVariance >= 0 ? "+" : "-"}₹{Math.abs(orgMetrics.costVariance).toFixed(0)} vs plan)
+                            {orgMetrics.belowPlanPercentage.toFixed(1)}% below expected
                         </div>
                     </div>
                 </div>
