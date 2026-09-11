@@ -32,17 +32,15 @@ function Home() {
     const [todayDate, setTodayDate] = useState(() => getLocalDateString());
     const [activeTab, setActiveTab] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
+    const [shiftMode, setShiftMode] = useState("DAY");
     const navigate = useNavigate();
 
-    const isNightShiftWindow = (() => {
-        const hour = new Date().getHours();
-        return hour >= 21 || hour < 6;
-    })();
+    const isNightShiftMode = shiftMode === "NIGHT";
 
     // A night shift that continues after midnight belongs to the date on
     // which it started. Day-shift views use the current local calendar day.
     const targetDateStr = (() => {
-        if (isNightShiftWindow && new Date().getHours() < 6) {
+        if (isNightShiftMode && new Date().getHours() < 6) {
             const previousDate = new Date();
             previousDate.setDate(previousDate.getDate() - 1);
             return getLocalDateString(previousDate);
@@ -50,7 +48,7 @@ function Home() {
         return todayDate;
     })();
 
-    const visibleShiftId = isNightShiftWindow ? "SHIFT_NIGHT" : "SHIFT_DAY";
+    const visibleShiftId = isNightShiftMode ? "SHIFT_NIGHT" : "SHIFT_DAY";
     const visibleEmployeeIds = Object.keys(employees).filter((employeeId) =>
         (employees[employeeId]?.shiftId || "SHIFT_DAY") === visibleShiftId
     );
@@ -183,7 +181,7 @@ function Home() {
         const diff = actual - expected;
 
         // Only generate deficit alert if current time is near/after shift end (e.g., after 17:00) or if worker left and is no longer active
-        const isShiftFinished = isNightShiftWindow
+        const isShiftFinished = isNightShiftMode
             ? currentHour >= 6 && currentHour < 21
             : currentHour >= 17 || !visibleActiveEmpIDs.includes(empID);
 
@@ -251,13 +249,31 @@ function Home() {
                 <div style={styles.header}>
                     <div>
                         <div style={styles.topBadge}>
-                            <span style={styles.liveDot}></span> BLE Gateway Active &bull; GATEWAY_01 Online &bull; {isNightShiftWindow ? "Night Shift" : "Day Shift"} ({targetDateStr})
+                            <span style={styles.liveDot}></span> BLE Gateway Active &bull; GATEWAY_01 Online &bull; {isNightShiftMode ? "Night Shift" : "Day Shift"} ({targetDateStr})
                         </div>
                         <h1 style={styles.dashboardTitle}>Workforce Dashboard</h1>
                         <p style={styles.subtitle}>Owner & Manager Efficiency, Labor Cost, and Exception Monitor</p>
                     </div>
                     
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <button
+                            onClick={() => setShiftMode(isNightShiftMode ? "DAY" : "NIGHT")}
+                            style={{
+                                padding: "10px 16px",
+                                backgroundColor: isNightShiftMode ? "#1E293B" : "#F1F5F9",
+                                color: isNightShiftMode ? "#F8FAFC" : "#0F172A",
+                                border: "1px solid #CBD5E1",
+                                borderRadius: "10px",
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px"
+                            }}
+                        >
+                            {isNightShiftMode ? "🌙 Night Shift" : "☀️ Day Shift"}
+                        </button>
                         <button style={styles.registerBtn} onClick={() => navigate("/register")}>
                             + Add Worker
                         </button>
