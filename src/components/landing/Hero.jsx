@@ -108,7 +108,7 @@ const Hero = () => {
 
                             <div style={styles.floatingBox3}>
                                 <div style={styles.cardLabel}>EST. LABOR COST TODAY</div>
-                                <div style={styles.costVal}>₹41,580</div>
+                                <div style={styles.costVal}>₹5,198</div>
                                 <div style={styles.costSub}>Tracked hours × Configured rates</div>
                             </div>
                         </div>

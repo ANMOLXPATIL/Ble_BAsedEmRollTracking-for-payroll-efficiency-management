@@ -62,7 +62,7 @@ const ProblemSection = () => {
                                     </div>
                                     <div>
                                         <span style={styles.footerLabel}>EST. COST IMPACT</span>
-                                        <span style={styles.footerVal}>₹3,220</span>
+                                        <span style={styles.footerVal}>₹402.50</span>
                                     </div>
                                 </div>
                             </div>

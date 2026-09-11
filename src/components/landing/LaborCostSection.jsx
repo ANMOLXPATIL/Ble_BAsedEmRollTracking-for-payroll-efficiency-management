@@ -24,7 +24,7 @@ const LaborCostSection = () => {
                             <span style={styles.mathOp}>=</span>
                             <div>
                                 <span style={styles.mathSub}>ESTIMATED COST</span>
-                                <span style={{ ...styles.mathVal, color: "#2563EB" }}>₹5,250</span>
+                                <span style={{ ...styles.mathVal, color: "#2563EB" }}>₹656.25</span>
                             </div>
                         </div>
 
