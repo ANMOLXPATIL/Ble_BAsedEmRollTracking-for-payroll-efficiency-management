@@ -194,7 +194,6 @@ void retryPendingEvents();
 
 void checkHeartbeat();
 void sendGatewayHeartbeat();
-void sendBeaconPresenceHeartbeat();
 
 String formatTimestamp(time_t timestamp);
 void formatDate(
@@ -233,7 +232,6 @@ void setup() {
 
   // First heartbeat immediately after startup.
   sendGatewayHeartbeat();
-  sendBeaconPresenceHeartbeat();
 
   Serial.println();
   Serial.println("Gateway is ready.");
@@ -662,7 +660,6 @@ void handleBeaconDetection(
       rssi
     );
 
-    sendBeaconPresenceHeartbeat();
   }
 }
 
@@ -733,7 +730,6 @@ void checkForExits(time_t now) {
       beacon.lastSeen = 0;
       beacon.lastRssi = -127;
 
-      sendBeaconPresenceHeartbeat();
     }
   }
 }
@@ -1055,7 +1051,6 @@ void checkHeartbeat() {
       millis();
 
     sendGatewayHeartbeat();
-    sendBeaconPresenceHeartbeat();
   }
 }
 
@@ -1146,71 +1141,6 @@ void sendGatewayHeartbeat() {
       "Heartbeat failed: " +
       fbdo.errorReason()
     );
-  }
-}
-
-// ============================================================
-//              SEND BEACON PRESENCE HEARTBEAT
-// ============================================================
-
-void sendBeaconPresenceHeartbeat() {
-
-  if (
-    WiFi.status() != WL_CONNECTED ||
-    !Firebase.ready() ||
-    !isSystemTimeValid()
-  ) {
-    return;
-  }
-
-  time_t now = time(nullptr);
-
-  for (size_t i = 0; i < BEACON_COUNT; i++) {
-
-    FirebaseJson json;
-
-    json.add(
-      "beaconId",
-      beacons[i].beaconId
-    );
-
-    json.add(
-      "gatewayId",
-      GATEWAY_ID
-    );
-
-    json.add(
-      "status",
-      beacons[i].isPresent ? "online" : "offline"
-    );
-
-    json.add(
-      "lastSeen",
-      formatTimestamp(
-        beacons[i].lastSeen > 0 ? beacons[i].lastSeen : now
-      )
-    );
-
-    json.add(
-      "unixTimestamp",
-      (long)now
-    );
-
-    json.add(
-      "rssi",
-      beacons[i].lastRssi
-    );
-
-    String path =
-      String("/presence/") +
-      beacons[i].beaconId;
-
-    if (!Firebase.setJSON(fbdo, path, json)) {
-      Serial.println(
-        "Presence heartbeat failed: " +
-        fbdo.errorReason()
-      );
-    }
   }
 }
 

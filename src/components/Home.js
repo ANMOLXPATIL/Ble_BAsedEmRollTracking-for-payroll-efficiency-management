@@ -12,14 +12,12 @@ import {
     calculateWorkforceVariance,
     calculateOrgWorkforceMetrics,
     processEventsToWorkSessions,
-    getLocalDateString
+    getLocalDateString,
+    resolveEmployeeId
 } from "../dbOperations";
 import { 
     RiAlertLine, 
-    RiCpuLine, 
-    RiTimeLine, 
-    RiUserSharedLine, 
-    RiCoinsLine 
+    RiCpuLine
 } from "react-icons/ri";
 
 function Home() {
@@ -30,11 +28,9 @@ function Home() {
     const [activeEmpIDs, setActiveEmpIDs] = useState([]);
     const [inactiveEmpIDs, setInactiveEmpIDs] = useState([]);
     const [todayTotals, setTodayTotals] = useState({});
-    const [livePresence, setLivePresence] = useState({});
     const [todayDate, setTodayDate] = useState(() => getLocalDateString());
     const [activeTab, setActiveTab] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
-    const [shiftMode, setShiftMode] = useState("DAY"); // "DAY" or "NIGHT"
     const navigate = useNavigate();
 
     // The dashboard is intentionally scoped to the current local calendar day.
@@ -68,18 +64,11 @@ function Home() {
         });
 
         const attendanceRef = ref(database, `attendance/${targetDateStr}`);
-        const presenceRef = ref(database, "presence");
-
-        const unsubscribePresence = onValue(presenceRef, (snapshot) => {
-            setLivePresence(snapshot.val() || {});
-        });
-
         const unsubscribe = onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val() || {};
             const active = [];
             const inactive = [];
             const totals = {};
-            const nowUnix = Math.floor(Date.now() / 1000);
 
             // 1. Pre-fill all registered employees as inactive first
             if (employees && Object.keys(employees).length > 0) {
@@ -97,20 +86,8 @@ function Home() {
             for (const key in data) {
                 if (key.startsWith("-") || key === "undefined") continue;
 
-                // Resolve beacon advertised name or beaconId to employee ID
-                let resolvedEmpID = key;
-                if (key === "beacon_001" || key === "Emp1Anmol@comp&iot" || key === "emp1") resolvedEmpID = "EMP001";
-                if (key === "beacon_002" || key === "Emp2Manthan@comp&iot" || key === "emp2") resolvedEmpID = "EMP002";
-
-                // Check for mapped employee in registry by beacon name or beacon ID
-                if (employees) {
-                    Object.keys(employees).forEach((eId) => {
-                        const empObj = employees[eId];
-                        if (empObj && (empObj.beaconId === key || empObj.beaconName === key)) {
-                            resolvedEmpID = eId;
-                        }
-                    });
-                }
+                const resolvedEmpID = resolveEmployeeId(key, employees, beacons);
+                if (!resolvedEmpID || !employees[resolvedEmpID]) continue;
 
                 const logsObj = data[key].logs || {};
                 
@@ -142,27 +119,6 @@ function Home() {
                 totals[resolvedEmpID] = processed.totalHours;
             }
 
-            // Live presence is independent of today's attendance totals. This
-            // keeps an employee present across midnight without importing old
-            // hours into today's metrics.
-            Object.keys(livePresence).forEach((key) => {
-                const presence = livePresence[key] || {};
-                const isFresh = Number(presence.unixTimestamp) > 0 &&
-                    nowUnix - Number(presence.unixTimestamp) <= 150;
-                if (presence.status === "online" && isFresh) {
-                    let resolvedEmpID = key;
-                    Object.keys(employees || {}).forEach((eId) => {
-                        const empObj = employees[eId];
-                        if (empObj && (empObj.beaconId === key || empObj.beaconName === key)) {
-                            resolvedEmpID = eId;
-                        }
-                    });
-                    if (!active.includes(resolvedEmpID)) active.push(resolvedEmpID);
-                    const idx = inactive.indexOf(resolvedEmpID);
-                    if (idx > -1) inactive.splice(idx, 1);
-                }
-            });
-
             setActiveEmpIDs(active);
             setInactiveEmpIDs(inactive);
             setTodayTotals(totals);
@@ -170,13 +126,13 @@ function Home() {
 
         return () => {
             unsubscribe();
-            unsubscribePresence();
             unsubGateways();
         };
-    }, [shiftMode, targetDateStr, employees, livePresence]);
+    }, [targetDateStr, employees, beacons]);
 
     // Filter out raw firebase push keys (keys starting with - or not matching known employee registry)
     const allEmpIDs = Array.from(new Set([...Object.keys(employees), ...activeEmpIDs, ...inactiveEmpIDs]))
+        .filter((id) => employees[id])
         .filter((id) => id && !id.startsWith("-") && id !== "undefined");
 
     // Organization-level Planned vs Actual metrics from shared helper
@@ -269,27 +225,6 @@ function Home() {
                     </div>
                     
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        {/* Night / Day Shift Mode Toggle Button */}
-                        <button 
-                            onClick={() => setShiftMode(shiftMode === "DAY" ? "NIGHT" : "DAY")}
-                            style={{
-                                padding: "10px 16px",
-                                backgroundColor: shiftMode === "NIGHT" ? "#1E293B" : "#F1F5F9",
-                                color: shiftMode === "NIGHT" ? "#F8FAFC" : "#0F172A",
-                                border: "1px solid #CBD5E1",
-                                borderRadius: "10px",
-                                fontSize: "13px",
-                                fontWeight: "600",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                transition: "all 0.2s ease"
-                            }}
-                        >
-                            <span>{shiftMode === "NIGHT" ? "🌙 Night Shift Mode" : "☀️ Day Shift Mode"}</span>
-                        </button>
-
                         <button style={styles.registerBtn} onClick={() => navigate("/register")}>
                             + Add Worker
                         </button>

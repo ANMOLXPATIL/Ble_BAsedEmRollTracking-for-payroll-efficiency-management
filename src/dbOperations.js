@@ -1,5 +1,5 @@
 import { database } from "./firebase";
-import { ref, get, set, push, child } from "firebase/database";
+import { ref, get, set, child } from "firebase/database";
 
 // Firebase attendance keys are written by the ESP32 using its configured
 // local timezone, so the web app must use local calendar dates as well.
@@ -8,6 +8,30 @@ export const getLocalDateString = (date = new Date()) => {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
+};
+
+export const resolveEmployeeId = (key, employees = {}, beacons = {}) => {
+    if (employees[key]) return key;
+
+    const employeeEntry = Object.entries(employees).find(([employeeId, employee]) =>
+        employeeId === key ||
+        employee?.beaconId === key ||
+        employee?.beaconName === key
+    );
+    if (employeeEntry) return employeeEntry[0];
+
+    const beaconEntry = Object.entries(beacons).find(([beaconKey, beacon]) =>
+        beaconKey === key ||
+        beacon?.id === key ||
+        beacon?.advertisedName === key
+    );
+    if (beaconEntry?.[1]?.employeeId && employees[beaconEntry[1].employeeId]) {
+        return beaconEntry[1].employeeId;
+    }
+
+    if (key === "beacon_001" || key === "Emp1Anmol@comp&iot" || key === "emp1") return "EMP001";
+    if (key === "beacon_002" || key === "Emp2Manthan@comp&iot" || key === "emp2") return "EMP002";
+    return null;
 };
 
 // Default Shift Configurations
@@ -171,8 +195,6 @@ export const calculateOrgWorkforceMetrics = (employeeDataMap = {}, todayTotalsMa
     let totalActualHours = 0;
     let totalExpectedLaborCost = 0;
     let totalEstimatedLaborCost = 0;
-    let totalPositiveVariance = 0;
-    let totalNegativeVariance = 0;
 
     scheduledEmpIDs.forEach((empID) => {
         const emp = employeeDataMap[empID] || {};
@@ -187,12 +209,6 @@ export const calculateOrgWorkforceMetrics = (employeeDataMap = {}, todayTotalsMa
         totalExpectedLaborCost += (expected * rate);
         totalEstimatedLaborCost += (actual * rate);
 
-        const varHrs = actual - expected;
-        if (varHrs >= 0) {
-            totalPositiveVariance += varHrs;
-        } else {
-            totalNegativeVariance += Math.abs(varHrs);
-        }
     });
 
     // Average calculations

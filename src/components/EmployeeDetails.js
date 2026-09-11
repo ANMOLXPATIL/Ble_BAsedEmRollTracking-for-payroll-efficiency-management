@@ -7,11 +7,13 @@ import "react-datepicker/dist/react-datepicker.css";
 import NavBar from "./Navbar";
 import { 
     processEventsToWorkSessions, 
-    fetchAttendanceEvents, 
     fetchShifts, 
-    DEFAULT_SHIFTS, 
+    DEFAULT_SHIFTS,
     calculateWorkforceVariance,
-    getLocalDateString
+    getLocalDateString,
+    fetchEmployees,
+    fetchBeacons,
+    resolveEmployeeId
 } from "../dbOperations";
 
 function EmployeeDetails() {
@@ -75,62 +77,77 @@ function EmployeeDetails() {
     };
 
     useEffect(() => {
-        const now = new Date();
-        const today = getLocalDateString(now);
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const firstDayOfMonth = `${year}-${month}-01`;
-        const attendanceRef = ref(database, "attendance");
+        let unsubscribe = null;
+        let cancelled = false;
 
-        const unsubscribe = onValue(attendanceRef, (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-            let totalActiveHoursToday = 0;
-            let totalPresentDays = 0;
-            let totalActiveHoursMonth = 0;
+        const subscribeToAttendance = async () => {
+            const [employeeMap, beaconMap] = await Promise.all([
+                fetchEmployees(),
+                fetchBeacons()
+            ]);
+            if (cancelled) return;
 
-            const legacyKey = empID === "EMP001" ? "emp1" : empID === "EMP002" ? "emp2" : empID;
+            const now = new Date();
+            const today = getLocalDateString(now);
+            const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+            const attendanceRef = ref(database, "attendance");
 
-            for (const date in data) {
-                if (date >= firstDayOfMonth && date <= today) {
-                    const empData = data[date][empID] || data[date][legacyKey];
-                    if (empData) {
-                        const dailyTotal = empData.total || 0;
-                        if (dailyTotal > 0) totalPresentDays++;
-                        totalActiveHoursMonth += dailyTotal;
-                        if (date === today) {
-                            totalActiveHoursToday = dailyTotal;
-                        }
-                    }
-                }
-            }
-            const avgActiveHours =
-                totalPresentDays > 0
-                    ? (totalActiveHoursMonth / totalPresentDays / 3600).toFixed(2)
-                    : 0;
-            setDetails({
-                activeHoursToday: (totalActiveHoursToday / 3600).toFixed(2),
-                presentDays: totalPresentDays,
-                avgActiveHours: avgActiveHours,
+            unsubscribe = onValue(attendanceRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                let totalActiveHoursToday = 0;
+                let totalPresentDays = 0;
+                let totalActiveHoursMonth = 0;
+
+                Object.entries(data).forEach(([date, dateData]) => {
+                    if (date < firstDayOfMonth || date > today) return;
+
+                    const dailyLogs = {};
+                    Object.entries(dateData || {}).forEach(([key, employeeRecord]) => {
+                        if (resolveEmployeeId(key, employeeMap, beaconMap) !== empID) return;
+                        Object.assign(dailyLogs, employeeRecord?.logs || {});
+                    });
+
+                    const dailySeconds = processEventsToWorkSessions(dailyLogs).totalTrackedSeconds;
+                    if (dailySeconds > 0) totalPresentDays++;
+                    totalActiveHoursMonth += dailySeconds;
+                    if (date === today) totalActiveHoursToday = dailySeconds;
+                });
+
+                setDetails({
+                    activeHoursToday: (totalActiveHoursToday / 3600).toFixed(2),
+                    presentDays: totalPresentDays,
+                    avgActiveHours: totalPresentDays > 0
+                        ? (totalActiveHoursMonth / totalPresentDays / 3600).toFixed(2)
+                        : 0
+                });
             });
-        });
+        };
 
-        return () => unsubscribe();
+        subscribeToAttendance();
+        return () => {
+            cancelled = true;
+            if (unsubscribe) unsubscribe();
+        };
     }, [empID]);
 
     useEffect(() => {
         if (!selectedDate) return;
         const formattedDate = getLocalDateString(selectedDate);
-        const legacyKey = empID === "EMP001" ? "emp1" : empID === "EMP002" ? "emp2" : empID;
 
         const loadSessions = async () => {
             const dbRef = ref(database);
-            let rawEvents = (await get(child(dbRef, `attendance/${formattedDate}/${empID}/logs`))).val() || {};
-
-            if (Object.keys(rawEvents).length === 0) {
-                const bcnKey = empID === "EMP001" ? "Emp1Anmol@comp&iot" : empID === "EMP002" ? "Emp2Manthan@comp&iot" : empID;
-                rawEvents = (await get(child(dbRef, `attendance/${formattedDate}/${bcnKey}/logs`))).val() || {};
-            }
+            const [dateSnapshot, employeeMap, beaconMap] = await Promise.all([
+                get(child(dbRef, `attendance/${formattedDate}`)),
+                fetchEmployees(),
+                fetchBeacons()
+            ]);
+            const rawEvents = {};
+            const dateData = dateSnapshot.val() || {};
+            Object.entries(dateData).forEach(([key, employeeRecord]) => {
+                if (resolveEmployeeId(key, employeeMap, beaconMap) === empID) {
+                    Object.assign(rawEvents, employeeRecord?.logs || {});
+                }
+            });
 
             const processed = processEventsToWorkSessions(rawEvents);
             const rawLogList = Object.values(rawEvents)
@@ -163,12 +180,14 @@ function EmployeeDetails() {
         const month = String(selectedMonth.getMonth() + 1).padStart(2, "0");
         const firstDayOfMonth = `${year}-${month}-01`;
         const lastDayOfMonth = `${year}-${month}-${new Date(year, month, 0).getDate()}`;
-        const attendanceRef = ref(database, "attendance");
-
-        const legacyKey = empID === "EMP001" ? "emp1" : empID === "EMP002" ? "emp2" : empID;
-
-        onValue(attendanceRef, (snapshot) => {
-            const data = snapshot.val();
+        const exportData = async () => {
+            const dbRef = ref(database);
+            const [attendanceSnapshot, employeeMap, beaconMap] = await Promise.all([
+                get(child(dbRef, "attendance")),
+                fetchEmployees(),
+                fetchBeacons()
+            ]);
+            const data = attendanceSnapshot.val();
             if (!data) {
                 alert("No data available for the selected month.");
                 return;
@@ -176,11 +195,15 @@ function EmployeeDetails() {
             const csvRows = ["Date,Active Hours (Hours),Entry/Exit Logs"];
             for (const date in data) {
                 if (date >= firstDayOfMonth && date <= lastDayOfMonth) {
-                    const empRecord = data[date][empID] || data[date][legacyKey];
-                    if (empRecord) {
-                        const dailyTotal = empRecord.total || 0;
-                        const logs = Object.values(empRecord.logs || {});
-                        const activeHours = (dailyTotal / 3600).toFixed(2);
+                    const logsById = {};
+                    Object.entries(data[date] || {}).forEach(([key, employeeRecord]) => {
+                        if (resolveEmployeeId(key, employeeMap, beaconMap) === empID) {
+                            Object.assign(logsById, employeeRecord?.logs || {});
+                        }
+                    });
+                    if (Object.keys(logsById).length > 0) {
+                        const logs = Object.values(logsById);
+                        const activeHours = (processEventsToWorkSessions(logsById).totalTrackedSeconds / 3600).toFixed(2);
                         const formattedLogs = logs
                             .map((log) => `${formatTimestampTo12Hour(log.timestamp)} - ${log.type}`)
                             .join("; ");
@@ -195,7 +218,10 @@ function EmployeeDetails() {
             a.href = url;
             a.download = `${employeeInfo.name || empID}-${year}-${month}-monthly-logs.csv`;
             a.click();
-        }, { onlyOnce: true });
+            URL.revokeObjectURL(url);
+        };
+
+        exportData();
     };
 
     // Phase 7 & 9 Metrics Calculation
