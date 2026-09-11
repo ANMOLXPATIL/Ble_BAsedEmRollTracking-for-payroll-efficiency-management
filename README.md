@@ -1,4 +1,4 @@
-# BLE Workforce Efficiency Management System
+# BLE Based Workforce Efficiency & payroll Management System
 
 A BLE-based workforce monitoring system that uses ESP32 and BLE beacons to automate employee attendance and provide workforce efficiency insights.
 
