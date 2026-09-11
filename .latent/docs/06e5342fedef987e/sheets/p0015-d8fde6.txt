@@ -1,4 +1,0 @@
-C.W.I.T, Pune-01 15 Dept of computer Engg & Iot
-10.SYSTEM DESIGN
-Figure 10.1. ER Diagram
-AccessLevel

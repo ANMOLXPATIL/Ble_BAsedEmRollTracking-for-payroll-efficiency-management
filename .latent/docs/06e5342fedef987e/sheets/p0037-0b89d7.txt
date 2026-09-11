@@ -1,4 +1,0 @@
-C.W.I.T, Pune-01 37 Dept of computer Engg & Iot
-14. WEBSITE PREVIEW
-Figure 14.1. Login Page
-Figure 14.2.Dashboard
