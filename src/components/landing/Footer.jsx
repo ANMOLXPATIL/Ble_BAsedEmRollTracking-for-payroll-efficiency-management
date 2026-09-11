@@ -8,12 +8,12 @@ const Footer = () => {
             <div style={styles.container}>
                 <div style={styles.topRow}>
                     <div>
-                        <div style={styles.logoGroup}>
+                        <Link to="/" style={styles.logoGroup} aria-label="Go to landing page">
                             <div style={styles.logoMark}>
                                 <RiCpuLine size={16} color="#FAF9F6" />
                             </div>
                             <span style={styles.logoTitle}>EMPTRACK</span>
-                        </div>
+                        </Link>
                         <p style={styles.descriptor}>BLE-Powered Workforce Intelligence & Labor Cost Visibility.</p>
                     </div>
 

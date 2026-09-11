@@ -52,7 +52,7 @@ function NavBar() {
             }}
         >
             {/* Brand Logo / Icon */}
-            <div 
+            <div
                 style={{
                     width: "40px",
                     height: "40px",
@@ -68,6 +68,15 @@ function NavBar() {
                     letterSpacing: "-0.05em"
                 }}
                 title="Workforce Intelligence System"
+                role="button"
+                tabIndex={0}
+                aria-label="Go to landing page"
+                onClick={() => navigate("/")}
+                onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        navigate("/");
+                    }
+                }}
             >
                 <RiCpuLine size={22} color="#10B981" />
             </div>
