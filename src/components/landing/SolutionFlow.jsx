@@ -175,7 +175,7 @@ const SolutionFlow = () => {
                         <div style={styles.seqItem}>
                             <span style={styles.seqStep}>EST. LABOR COST</span>
                             <span style={{ ...styles.seqCode, color: "#2563EB", fontSize: "16px" }}>₹5,845</span>
-                            <span style={styles.seqTime}>₹700 / hr Rate</span>
+                            <span style={styles.seqTime}>₹87.50 / hr Rate</span>
                         </div>
                     </div>
                 </div>

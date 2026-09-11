@@ -14,7 +14,7 @@ const LaborCostSection = () => {
                         <div style={styles.mathRow}>
                             <div>
                                 <span style={styles.mathSub}>CONFIGURED RATE</span>
-                                <span style={styles.mathVal}>₹700 / hr</span>
+                                <span style={styles.mathVal}>₹87.50 / hr</span>
                             </div>
                             <span style={styles.mathOp}>×</span>
                             <div>

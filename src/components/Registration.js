@@ -94,6 +94,18 @@ function Registration() {
                             </div>
                         </div>
 
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                            <label style={{ fontSize: "12px", fontWeight: "600", textTransform: "uppercase", color: "#475569", letterSpacing: "0.05em" }}>Hourly Rate (₹)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                defaultValue="87.5"
+                                {...register("hourlyRate")}
+                                style={{ padding: "12px 14px", border: "1px solid #CBD5E1", borderRadius: "8px", fontSize: "14px", outline: "none", fontFamily: "inherit" }}
+                            />
+                        </div>
+
                         <div style={{ borderTop: "1px solid #E2E8F0", paddingTop: "20px", marginTop: "10px" }}>
                             <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", fontWeight: "600", color: "#0F172A" }}>Physical BLE Beacon Association</h4>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>

@@ -46,7 +46,7 @@ const AnalyticsSection = () => {
                             <div style={styles.statCard}>
                                 <span style={styles.statLabel}>Estimated Labor Cost</span>
                                 <span style={{ ...styles.statVal, color: "#6366F1" }}>₹207,200</span>
-                                <span style={styles.statSub}>Based on ₹700/hr avg</span>
+                                <span style={styles.statSub}>Based on ₹87.50/hr avg</span>
                             </div>
                         </div>
 

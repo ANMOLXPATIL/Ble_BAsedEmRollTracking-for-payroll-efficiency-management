@@ -9,6 +9,7 @@ import {
     processEventsToWorkSessions, 
     fetchShifts, 
     DEFAULT_SHIFTS,
+    DEFAULT_HOURLY_RATE,
     calculateWorkforceVariance,
     getLocalDateString,
     fetchEmployees,
@@ -28,7 +29,7 @@ function EmployeeDetails() {
     const [employeeInfo, setEmployeeInfo] = useState({
         name: empID,
         department: "Factory Floor",
-        hourlyRate: 700,
+        hourlyRate: DEFAULT_HOURLY_RATE,
         beaconId: "beacon_001",
         shiftId: "SHIFT_DAY"
     });
@@ -55,7 +56,7 @@ function EmployeeDetails() {
             const snapshot = await get(child(dbRef, `employees/${empID}`));
             if (snapshot.exists()) {
                 const empData = snapshot.val();
-                setEmployeeInfo(empData);
+                setEmployeeInfo({ ...empData, hourlyRate: DEFAULT_HOURLY_RATE });
                 
                 const shiftSnap = await fetchShifts();
                 if (shiftSnap && shiftSnap[empData.shiftId]) {

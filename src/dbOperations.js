@@ -1,6 +1,8 @@
 import { database } from "./firebase";
 import { ref, get, set, child } from "firebase/database";
 
+export const DEFAULT_HOURLY_RATE = 87.5;
+
 // Firebase attendance keys are written by the ESP32 using its configured
 // local timezone, so the web app must use local calendar dates as well.
 export const getLocalDateString = (date = new Date()) => {
@@ -89,7 +91,7 @@ export const DEFAULT_EMPLOYEES = {
         id: "EMP001",
         name: "Anmol Patil",
         department: "Engineering & IoT",
-        hourlyRate: 700,
+        hourlyRate: DEFAULT_HOURLY_RATE,
         beaconId: "beacon_001",
         beaconName: "Emp1Anmol@comp&iot",
         shiftId: "SHIFT_DAY",
@@ -99,7 +101,7 @@ export const DEFAULT_EMPLOYEES = {
         id: "EMP002",
         name: "Manthan Patil",
         department: "Operations",
-        hourlyRate: 650,
+        hourlyRate: DEFAULT_HOURLY_RATE,
         beaconId: "beacon_002",
         beaconName: "Emp2Manthan@comp&iot",
         shiftId: "SHIFT_DAY",
@@ -424,7 +426,7 @@ export const addEmployee = async (employeeData) => {
         id: empID,
         name: employeeData.name || "Unnamed Employee",
         department: employeeData.department || "General",
-        hourlyRate: Number(employeeData.hourlyRate) || 500,
+        hourlyRate: Number(employeeData.hourlyRate) || DEFAULT_HOURLY_RATE,
         beaconId: employeeData.beaconId || "beacon_001",
         shiftId: employeeData.shiftId || "SHIFT_DAY",
         email: employeeData.email || "",
@@ -450,7 +452,14 @@ export const addEmployee = async (employeeData) => {
 export const fetchEmployees = async () => {
     const dbRef = ref(database);
     const snapshot = await get(child(dbRef, "employees"));
-    return snapshot.exists() ? snapshot.val() : {};
+    if (!snapshot.exists()) return {};
+
+    return Object.fromEntries(
+        Object.entries(snapshot.val()).map(([employeeId, employee]) => [
+            employeeId,
+            { ...employee, hourlyRate: DEFAULT_HOURLY_RATE }
+        ])
+    );
 };
 
 // Fetch all beacons
