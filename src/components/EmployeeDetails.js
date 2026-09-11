@@ -154,21 +154,10 @@ function EmployeeDetails() {
                 Object.entries(rawEvents).filter(([, event]) => isAttendanceTransition(event))
             );
             const processed = processEventsToWorkSessions(transitionEvents);
-            const rawLogList = Object.values(transitionEvents)
-                .sort((a, b) => {
-                    const timeA = a.unixTimestamp || (a.timestamp ? new Date(a.timestamp.replace(" ", "T")).getTime() / 1000 : 0);
-                    const timeB = b.unixTimestamp || (b.timestamp ? new Date(b.timestamp.replace(" ", "T")).getTime() / 1000 : 0);
-                    return timeA - timeB;
-                })
-                .map(ev => ({
-                    ...ev,
-                    formattedTime: formatTimestampTo12Hour(ev.timestamp)
-                }));
-
             setSessionData({
                 sessions: processed.sessions,
                 totalHours: processed.totalHours,
-                rawLogs: rawLogList
+                rawLogs: []
             });
         };
 
@@ -196,7 +185,7 @@ function EmployeeDetails() {
                 alert("No data available for the selected month.");
                 return;
             }
-            const csvRows = ["Date,Active Hours (Hours),Entry/Exit Logs"];
+            const csvRows = ["Date,Entry Time,Exit Time,Duration (Hours),Status"];
             for (const date in data) {
                 if (date >= firstDayOfMonth && date <= lastDayOfMonth) {
                     const logsById = {};
@@ -210,12 +199,16 @@ function EmployeeDetails() {
                         }
                     });
                     if (Object.keys(logsById).length > 0) {
-                        const logs = Object.values(logsById);
-                        const activeHours = (processEventsToWorkSessions(logsById).totalTrackedSeconds / 3600).toFixed(2);
-                        const formattedLogs = logs
-                            .map((log) => `${formatTimestampTo12Hour(log.timestamp)} - ${log.type}`)
-                            .join("; ");
-                        csvRows.push(`${date},${activeHours},"${formattedLogs}"`);
+                        const sessions = processEventsToWorkSessions(logsById).sessions;
+                        sessions.forEach((session) => {
+                            const entryTime = formatTimestampTo12Hour(session.enterTime);
+                            const exitTime = session.exitTime
+                                ? formatTimestampTo12Hour(session.exitTime)
+                                : "";
+                            const durationHours = (session.durationSeconds / 3600).toFixed(2);
+                            const status = session.isOngoing ? "ONGOING" : "COMPLETED";
+                            csvRows.push(`${date},${entryTime},${exitTime},${durationHours},${status}`);
+                        });
                     }
                 }
             }
@@ -341,21 +334,28 @@ function EmployeeDetails() {
                     </div>
 
                     <div style={{ backgroundColor: "#FFFFFF", padding: "28px", borderRadius: "16px", border: "1px solid #E2E8F0" }}>
-                        <h3 style={{ marginTop: 0, marginBottom: "20px", fontSize: "16px", fontWeight: "700" }}>Raw Gateway Detection Logs</h3>
+                        <h3 style={{ marginTop: 0, marginBottom: "20px", fontSize: "16px", fontWeight: "700" }}>Entry / Exit Sessions</h3>
                         <p style={{ color: "#64748B", fontSize: "13px", marginBottom: "16px" }}>
-                            Independent detection events (`ENTER` / `EXIT`) captured by BLE gateways.
+                            Work sessions reconstructed from confirmed attendance transitions.
                         </p>
 
-                        {sessionData.rawLogs.length === 0 ? (
-                            <p style={{ color: "#94A3B8", textAlign: "center", padding: "20px 0" }}>No detection events logged on this date.</p>
+                        {sessionData.sessions.length === 0 ? (
+                            <p style={{ color: "#94A3B8", textAlign: "center", padding: "20px 0" }}>No entry/exit sessions recorded for this date.</p>
                         ) : (
-                            <ul style={{ listStyleType: "none", paddingLeft: 0, margin: 0, maxHeight: "240px", overflowY: "auto", display: "flex", flexDirection: "column" }}>
-                                {sessionData.rawLogs.slice().reverse().map((log, index) => (
-                                    <li key={index} style={{ padding: "10px 14px", background: "#F8FAFC", borderRadius: "8px", marginBottom: "8px", borderLeft: (log.type === "ENTER" || log.type === "entry") ? "4px solid #10B981" : "4px solid #64748B", display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-                                        <strong style={{ color: (log.type === "ENTER" || log.type === "entry") ? "#059669" : "#475569" }}>
-                                            {(log.type || "EVENT").toUpperCase()}
-                                        </strong>
-                                        <span style={{ color: "#64748B" }}>{log.formattedTime} &bull; RSSI {log.rssi || -60}dBm</span>
+                            <ul style={{ listStyleType: "none", paddingLeft: 0, margin: 0, maxHeight: "300px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
+                                {sessionData.sessions.map((session, index) => (
+                                    <li key={session.sessionId || index} style={{ padding: "12px 14px", background: "#F8FAFC", borderRadius: "8px", border: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px" }}>
+                                        <div>
+                                            <strong style={{ color: "#0F172A" }}>Session #{index + 1}</strong>
+                                            <div style={{ color: "#64748B", marginTop: "4px" }}>
+                                                Entry {formatTimestampTo12Hour(session.enterTime)}
+                                                {"  "}→{"  "}
+                                                {session.exitTime ? `Exit ${formatTimestampTo12Hour(session.exitTime)}` : "Still on-site"}
+                                            </div>
+                                        </div>
+                                        <span style={{ color: session.isOngoing ? "#2563EB" : "#059669", fontWeight: "700" }}>
+                                            {session.formattedDuration}
+                                        </span>
                                     </li>
                                 ))}
                             </ul>
