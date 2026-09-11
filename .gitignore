@@ -17,6 +17,10 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env
+
+# Local ESP32 credentials
+embedded/esp32_secrets.h
 
 npm-debug.log*
 yarn-debug.log*

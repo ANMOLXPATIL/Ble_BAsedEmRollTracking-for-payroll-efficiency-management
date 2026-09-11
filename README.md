@@ -71,7 +71,13 @@ Deploy the generated `build/` directory to a static hosting provider configured 
 
 ## Firebase configuration
 
-The React app uses the Firebase web configuration in `src/firebase.js`. Firebase web API keys are identifiers, not admin credentials, but Realtime Database rules and Authentication must still be configured correctly.
+The React app reads its Firebase web configuration from environment variables. Create a local `.env` file from `.env.example`; `.env` is ignored by Git and must never be committed.
+
+```bash
+copy .env.example .env
+```
+
+Fill in the Firebase project values before running the dashboard. Firebase web API keys are identifiers, not admin credentials, but Realtime Database rules and Authentication must still be configured correctly.
 
 The ESP32 requires:
 
@@ -79,7 +85,13 @@ The ESP32 requires:
 - a write credential supported by the installed `FirebaseESP32` library
 - Wi-Fi SSID and password
 
-Do not commit Wi-Fi passwords, Firebase legacy database secrets, service-account keys, or other private credentials. The firmware contains safe placeholders; replace them locally before uploading. Any credential that was previously committed must be rotated in Firebase and on the Wi-Fi network.
+For the ESP32, copy the local secrets template and fill it in:
+
+```bash
+copy embedded\esp32_secrets.h.example embedded\esp32_secrets.h
+```
+
+`embedded/esp32_secrets.h` is ignored by Git. Do not commit Wi-Fi passwords, Firebase legacy database secrets, service-account keys, or other private credentials. Any credential that was previously committed must be rotated in Firebase and on the Wi-Fi network.
 
 ## ESP32 firmware
 
@@ -99,8 +111,8 @@ The supplied firmware:
 
 Before uploading:
 
-1. Open `embedded/esp32_gateway.ino`.
-2. Fill in the local Wi-Fi and Firebase values.
+1. Copy and configure `embedded/esp32_secrets.h`.
+2. Open `embedded/esp32_gateway.ino`.
 3. Select the correct ESP32 board and serial port.
 4. Compile and upload.
 5. Open Serial Monitor at `115200` baud.

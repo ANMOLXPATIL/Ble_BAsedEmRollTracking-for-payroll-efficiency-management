@@ -3,16 +3,25 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
-// Your Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAmA7B_mNFf-gFc38iqJ8NGYB-agCFoeco",
-    authDomain: "emprolltracking.firebaseapp.com",
-    databaseURL: "https://emprolltracking-default-rtdb.firebaseio.com",
-    projectId: "emprolltracking",
-    storageBucket: "emprolltracking.firebasestorage.app",
-    messagingSenderId: "822716527493",
-    appId: "1:822716527493:web:645c363f54adf8c767caec"
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
+
+const missingConfig = Object.entries(firebaseConfig)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+if (missingConfig.length > 0) {
+    throw new Error(
+        `Missing Firebase environment variables: ${missingConfig.join(", ")}`
+    );
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

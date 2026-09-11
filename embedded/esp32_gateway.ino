@@ -3,20 +3,13 @@
 #include <BLEDevice.h>
 #include <BLEScan.h>
 #include <time.h>
+#include "esp32_secrets.h"
 
 // ============================================================
 //                     CONFIGURATION
 // ============================================================
 
 // ---------------- Wi-Fi ----------------
-#define WIFI_SSID "BLEPROJECT"
-#define WIFI_PASSWORD "Anmol@<>"
-
-// ---------------- Firebase ----------------
-// Rotate the old secret before using this version.
-#define FIREBASE_HOST "emprolltracking-default-rtdb.firebaseio.com"
-#define FIREBASE_SECRET "tEsqKC0bUzeeyBQ2HCfxFZeynQoUyhX6eEXVu3gT"
-
 // ---------------- Gateway ----------------
 #define GATEWAY_ID "GATEWAY_01"
 #define ZONE_ID "ZONE_ENTRANCE"
