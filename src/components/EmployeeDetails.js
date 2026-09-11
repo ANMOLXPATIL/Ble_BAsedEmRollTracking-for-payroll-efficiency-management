@@ -13,7 +13,8 @@ import {
     getLocalDateString,
     fetchEmployees,
     fetchBeacons,
-    resolveEmployeeId
+    resolveEmployeeId,
+    isAttendanceTransition
 } from "../dbOperations";
 
 function EmployeeDetails() {
@@ -149,8 +150,11 @@ function EmployeeDetails() {
                 }
             });
 
-            const processed = processEventsToWorkSessions(rawEvents);
-            const rawLogList = Object.values(rawEvents)
+            const transitionEvents = Object.fromEntries(
+                Object.entries(rawEvents).filter(([, event]) => isAttendanceTransition(event))
+            );
+            const processed = processEventsToWorkSessions(transitionEvents);
+            const rawLogList = Object.values(transitionEvents)
                 .sort((a, b) => {
                     const timeA = a.unixTimestamp || (a.timestamp ? new Date(a.timestamp.replace(" ", "T")).getTime() / 1000 : 0);
                     const timeB = b.unixTimestamp || (b.timestamp ? new Date(b.timestamp.replace(" ", "T")).getTime() / 1000 : 0);
@@ -198,7 +202,11 @@ function EmployeeDetails() {
                     const logsById = {};
                     Object.entries(data[date] || {}).forEach(([key, employeeRecord]) => {
                         if (resolveEmployeeId(key, employeeMap, beaconMap) === empID) {
-                            Object.assign(logsById, employeeRecord?.logs || {});
+                            Object.entries(employeeRecord?.logs || {}).forEach(([eventId, event]) => {
+                                if (isAttendanceTransition(event)) {
+                                    logsById[eventId] = event;
+                                }
+                            });
                         }
                     });
                     if (Object.keys(logsById).length > 0) {

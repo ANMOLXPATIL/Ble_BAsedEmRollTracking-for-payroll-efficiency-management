@@ -34,6 +34,11 @@ export const resolveEmployeeId = (key, employees = {}, beacons = {}) => {
     return null;
 };
 
+export const isAttendanceTransition = (event = {}) => {
+    const type = String(event.type || "").toUpperCase();
+    return type === "ENTRY" || type === "ENTER" || type === "EXIT";
+};
+
 // Default Shift Configurations
 export const DEFAULT_SHIFTS = {
     SHIFT_DAY: {
