@@ -34,7 +34,7 @@ const styles = {
     section: {
         backgroundColor: "var(--bg-dark)",
         color: "var(--text-light)",
-        padding: "72px 0",
+        padding: "56px 0",
         borderBottom: "1px solid var(--border-dark)"
     },
     container: {

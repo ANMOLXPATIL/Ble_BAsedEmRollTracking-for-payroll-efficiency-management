@@ -63,7 +63,7 @@ const AttendanceSection = () => {
 const styles = {
     section: {
         backgroundColor: "#F4F2ED",
-        padding: "72px 0",
+        padding: "56px 0",
         borderBottom: "1px solid rgba(22, 23, 25, 0.08)"
     },
     container: {
