@@ -60,7 +60,7 @@ const PlannedVsActual = () => {
 const styles = {
     section: {
         backgroundColor: "var(--bg-light-soft)",
-        padding: "56px 0",
+        padding: "40px 0",
         borderBottom: "1px solid var(--border-light)"
     },
     container: {

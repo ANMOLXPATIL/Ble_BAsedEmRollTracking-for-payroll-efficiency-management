@@ -135,8 +135,8 @@ const Hero = () => {
 const styles = {
     section: {
         backgroundColor: "var(--bg-light)",
-        paddingTop: "130px",
-        paddingBottom: "32px",
+        paddingTop: "114px",
+        paddingBottom: "16px",
         borderBottom: "1px solid var(--border-light)"
     },
     container: {

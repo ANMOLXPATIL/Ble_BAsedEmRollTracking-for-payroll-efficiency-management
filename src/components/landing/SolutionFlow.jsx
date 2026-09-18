@@ -188,7 +188,7 @@ const styles = {
     section: {
         backgroundColor: "var(--bg-dark)",
         color: "var(--text-light)",
-        padding: "48px 0",
+        padding: "32px 0",
         borderBottom: "1px solid var(--border-dark)",
         position: "relative",
         overflow: "hidden"

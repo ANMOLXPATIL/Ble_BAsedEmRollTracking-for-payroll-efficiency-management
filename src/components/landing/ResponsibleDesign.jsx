@@ -20,7 +20,7 @@ const ResponsibleDesign = () => {
 const styles = {
     section: {
         backgroundColor: "var(--bg-light)",
-        padding: "48px 0",
+        padding: "32px 0",
         borderBottom: "1px solid var(--border-light)",
         textAlign: "left"
     },
