@@ -53,7 +53,7 @@ const LaborCostSection = () => {
 const styles = {
     section: {
         backgroundColor: "var(--bg-light)",
-        padding: "110px 0",
+        padding: "72px 0",
         borderBottom: "1px solid var(--border-light)"
     },
     container: {

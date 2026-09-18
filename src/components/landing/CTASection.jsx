@@ -29,7 +29,7 @@ const styles = {
     section: {
         backgroundColor: "var(--bg-dark)",
         color: "var(--text-light)",
-        padding: "120px 0",
+        padding: "80px 0",
         textAlign: "center"
     },
     container: {

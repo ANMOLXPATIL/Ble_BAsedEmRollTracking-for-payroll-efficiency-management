@@ -136,7 +136,7 @@ const styles = {
     section: {
         backgroundColor: "var(--bg-light)",
         paddingTop: "130px",
-        paddingBottom: "80px",
+        paddingBottom: "48px",
         borderBottom: "1px solid var(--border-light)"
     },
     container: {
