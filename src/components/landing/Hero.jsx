@@ -26,7 +26,7 @@ const Hero = () => {
 
                     <Reveal delay={0.2}>
                         <p style={styles.editorialSubtext}>
-                            EMPTRACK uses BLE-based presence detection to automate attendance, 
+                           EMPTRACK uses BLE-based tag to detect presence to automate attendance, 
                             track work hours, and give owners a clearer view of workforce utilization 
                             and estimated labor cost.
                         </p>
